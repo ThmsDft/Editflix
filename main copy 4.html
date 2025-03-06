@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Éditeur A4 - Export PNG</title>
+    <!-- Lien pour charger la police Inter de Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        height: 100vh;
+        background-color: #ccc;
+        gap: 10px;
+        overflow: hidden;
+      }
+      #controls {
+        width: 300px;
+        padding: 10px;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      #canvas-container {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+      }
+      canvas {
+        background: #eee;
+        width: 100%;
+        height: 100%;
+      }
+      input,
+      textarea,
+      button {
+        padding: 8px;
+        font-size: 14px;
+      }
+      textarea {
+        resize: vertical;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="controls">
+      <!-- Champs de contrôle -->
+      <input type="text" id="serie-title" value="Titre" />
+      <input
+        type="number"
+        id="recommendation"
+        value="98"
+        placeholder="Pourcentage"
+      />
+      <input type="text" id="year" value="2024" placeholder="Année" />
+      <!-- Inputs pour le rectangle -->
+      <input
+        type="number"
+        id="rectangle-number"
+        value="12"
+        placeholder="Nombre"
+      />
+      <input
+        type="text"
+        id="rectangle-right-text"
+        value="crises, pleurs"
+        placeholder="Texte à droite"
+      />
+      <!-- Nouvel input pour le texte de l'histoire -->
+      <textarea id="story-text" rows="4" placeholder="Texte d'histoire">
+Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et demi, qui n'hésite pas à exprimer ses souhaits. Bien que la vie ne soit pas toujours facile, notamment lorsqu'il s'agit de gérer des parents bien intentionnés mais parfois maladroits, Juliann ne se décourage jamais et persévère jusqu'à l'obtention de ce qu'il désire vraiment.
+      </textarea>
+      <input type="file" id="photo" accept="image/*" />
+      <button id="export-png">Exporter en PNG</button>
+    </div>
+    <div id="canvas-container">
+      <canvas id="editor"></canvas>
+    </div>
+    <script>
+      // Dimensions de la feuille A4 pour l'affichage interactif
+      const baseWidth = 600,
+        baseHeight = 849;
+      // Pour l'interactivité, position et échelle de la page dans le canvas
+      let pageX = 0,
+        pageY = 0,
+        pageScale = 1;
+      // Contenu dynamique
+      let seriesTitle = "Titre",
+        photo = null;
+
+      // Chargement des images SVG
+      let netflixSvgImage = new Image();
+      netflixSvgImage.src = "netflix2.svg";
+      netflixSvgImage.onload = draw;
+
+      let hdSvgImage = new Image();
+      hdSvgImage.src = "HD.svg";
+      hdSvgImage.onload = draw;
+
+      let rectangleSvgImage = new Image();
+      rectangleSvgImage.src = "rectangle.svg";
+      rectangleSvgImage.onload = draw;
+
+      let top10SvgImage = new Image();
+      top10SvgImage.src = "Top10.svg";
+      top10SvgImage.onload = draw;
+
+      const canvas = document.getElementById("editor");
+      const ctx = canvas.getContext("2d");
+
+      // Fonction utilitaire pour envelopper du texte
+      function wrapText(context, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(" ");
+        let line = "";
+        for (let n = 0; n < words.length; n++) {
+          const testLine = line + words[n] + " ";
+          if (context.measureText(testLine).width > maxWidth && n > 0) {
+            context.fillText(line, x, y);
+            line = words[n] + " ";
+            y += lineHeight;
+          } else {
+            line = testLine;
+          }
+        }
+        context.fillText(line, x, y);
+      }
+
+      // Fonction de dessin commune
+      // pX, pY : offset du "page" sur le contexte fourni
+      // scale : facteur d'échelle (1 pour export complet, ou pageScale pour l'interactif)
+      function drawContent(context, pX, pY, scale) {
+        const pageW = baseWidth * scale,
+          pageH = baseHeight * scale;
+        // Fond de la page (zone A4)
+        context.fillStyle = "black";
+        context.fillRect(pX, pY, pageW, pageH);
+
+        // Image de fond et dégradé noir (80% de la hauteur)
+        if (photo) {
+          const targetWidth = pageW,
+            targetHeight = pageH * 0.8,
+            scaleFactor = Math.max(
+              targetWidth / photo.width,
+              targetHeight / photo.height
+            ),
+            imgW = photo.width * scaleFactor,
+            imgH = photo.height * scaleFactor,
+            imgX = pX + (targetWidth - imgW) / 2,
+            imgY = pY + (targetHeight - imgH) / 2;
+          context.save();
+          context.beginPath();
+          context.rect(pX, pY, targetWidth, targetHeight);
+          context.clip();
+          context.drawImage(photo, imgX, imgY, imgW, imgH);
+          context.restore();
+
+          const gradYStart = pY + pageH * 0.3,
+            gradYEnd = pY + targetHeight * 1.01;
+          let gradient = context.createLinearGradient(
+            pX,
+            gradYStart,
+            pX,
+            gradYEnd
+          );
+          gradient.addColorStop(0, "rgba(0, 0, 0, 0)");
+          gradient.addColorStop(1, "rgba(0, 0, 0, 1)");
+          context.fillStyle = gradient;
+          context.fillRect(pX, gradYStart, targetWidth, gradYEnd - gradYStart);
+        }
+
+        // Titre de la série
+        context.save();
+        context.beginPath();
+        context.rect(pX, pY, pageW, pageH);
+        context.clip();
+        context.fillStyle = "white";
+        context.font = "900 " + 80 * scale + "px 'Inter', sans-serif";
+        context.textBaseline = "bottom";
+        let margin = 34 * scale;
+        context.fillText(seriesTitle, pX + margin, pY + pageH - margin * 8.4);
+        context.restore();
+
+        // SVG Netflix
+        if (
+          netflixSvgImage.complete &&
+          netflixSvgImage.naturalWidth &&
+          netflixSvgImage.naturalHeight
+        ) {
+          const marginSvg = 35 * scale,
+            desiredSvgWidth = 200 * scale,
+            ratio =
+              netflixSvgImage.naturalWidth / netflixSvgImage.naturalHeight,
+            desiredSvgHeight = desiredSvgWidth / ratio,
+            svgX = pX + marginSvg,
+            svgY = pY + pageH - desiredSvgHeight - marginSvg * 7.2;
+          context.drawImage(
+            netflixSvgImage,
+            svgX,
+            svgY,
+            desiredSvgWidth,
+            desiredSvgHeight
+          );
+        }
+
+        // Texte "Recommandé à XX % YYYY"
+        context.save();
+        context.font = "600 " + 11 * scale + "px 'Inter', sans-serif";
+        context.textBaseline = "bottom";
+        const recMargin = 35 * scale,
+          recX = pX + recMargin,
+          recY = pY + pageH - recMargin * 5.2,
+          recText1 = "Recommandé à ",
+          recPercentage =
+            document.getElementById("recommendation").value || "98",
+          recText2 = " %  ",
+          recYear = document.getElementById("year").value || "2024";
+        context.fillStyle = "#45D068";
+        context.fillText(recText1, recX, recY);
+        const width1 = context.measureText(recText1).width;
+        context.fillText(recPercentage, recX + width1, recY);
+        const width2 = context.measureText(recPercentage).width;
+        context.fillText(recText2, recX + width1 + width2, recY);
+        const width3 = context.measureText(recText2).width;
+        context.fillStyle = "#B5B5B5";
+        context.fillText(recYear, recX + width1 + width2 + width3, recY);
+        context.restore();
+
+        // SVG HD
+        if (
+          hdSvgImage.complete &&
+          hdSvgImage.naturalWidth &&
+          hdSvgImage.naturalHeight
+        ) {
+          const iconAdditionalMargin = 5 * scale,
+            iconX =
+              recX +
+              (width1 + width2 + width3 + context.measureText(recYear).width) +
+              iconAdditionalMargin,
+            iconWidth = 16.3 * scale * 1.3,
+            iconHeight =
+              iconWidth * (hdSvgImage.naturalHeight / hdSvgImage.naturalWidth),
+            iconY = recY - iconHeight * 1.05;
+          context.drawImage(hdSvgImage, iconX, iconY, iconWidth, iconHeight);
+        }
+
+        // Rectangle et textes associés
+        if (
+          rectangleSvgImage.complete &&
+          rectangleSvgImage.naturalWidth &&
+          rectangleSvgImage.naturalHeight
+        ) {
+          const rectMarginTop = 5 * scale,
+            desiredRectWidth = 100 * scale * 0.28,
+            desiredRectHeight =
+              desiredRectWidth *
+              (rectangleSvgImage.naturalHeight /
+                rectangleSvgImage.naturalWidth),
+            rectX = recX,
+            rectY = recY + rectMarginTop;
+          context.drawImage(
+            rectangleSvgImage,
+            rectX,
+            rectY,
+            desiredRectWidth,
+            desiredRectHeight
+          );
+          const rectValue =
+              document.getElementById("rectangle-number").value || "12",
+            rectText = rectValue + "+";
+          context.save();
+          context.font =
+            "bold " + desiredRectHeight * 0.6 + "px 'Inter', sans-serif";
+          context.fillStyle = "#B5B5B5";
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          context.fillText(
+            rectText,
+            rectX + desiredRectWidth / 2,
+            rectY + desiredRectHeight / 2
+          );
+          context.restore();
+
+          const rightText =
+            document.getElementById("rectangle-right-text").value ||
+            "crises, pleurs";
+          context.save();
+          context.font =
+            "600 " + desiredRectHeight * 0.8 + "px 'Inter', sans-serif";
+          context.fillStyle = "#B5B5B5";
+          context.textAlign = "left";
+          context.textBaseline = "middle";
+          const marginBetween = 5 * scale;
+          context.fillText(
+            rightText,
+            rectX + desiredRectWidth + marginBetween,
+            rectY + desiredRectHeight / 2
+          );
+          context.restore();
+
+          // Top10 SVG et texte associé
+          if (
+            top10SvgImage.complete &&
+            top10SvgImage.naturalWidth &&
+            top10SvgImage.naturalHeight
+          ) {
+            const top10MarginTop = 10 * scale,
+              top10X = recX,
+              top10Y = rectY + desiredRectHeight + top10MarginTop,
+              desiredTop10Width = 18 * scale,
+              desiredTop10Height =
+                desiredTop10Width *
+                (top10SvgImage.naturalHeight / top10SvgImage.naturalWidth);
+            context.drawImage(
+              top10SvgImage,
+              top10X,
+              top10Y,
+              desiredTop10Width,
+              desiredTop10Height
+            );
+            context.save();
+            context.font =
+              "600 " + desiredTop10Height * 0.8 + "px 'Inter', sans-serif";
+            context.fillStyle = "white";
+            context.textBaseline = "middle";
+            const marginBetweenTop10 = 8 * scale,
+              textX = top10X + desiredTop10Width + marginBetweenTop10,
+              textY = top10Y + (desiredTop10Height / 2) * 1.1;
+            context.fillText("N° 1 des séries TV aujourd’hui", textX, textY);
+            context.restore();
+
+            // Bloc de texte d'histoire
+            const storyMarginTop = 30 * scale,
+              storyX = recX,
+              storyY = top10Y + desiredTop10Height + storyMarginTop,
+              storyBoxWidth = pageW - recMargin * 7,
+              storyFontSize = 11.4 * scale,
+              storyLineHeight = storyFontSize * 1.2,
+              storyText =
+                document.getElementById("story-text").value ||
+                "Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et demi, qui n'hésite pas à exprimer ses souhaits. Bien que la vie ne soit pas toujours facile, notamment lorsqu'il s'agit de gérer des parents bien intentionnés mais parfois maladroits, Juliann ne se décourage jamais et persévère jusqu'à l'obtention de ce qu'il désire vraiment.";
+            context.save();
+            context.font = storyFontSize + "px 'Inter', sans-serif";
+            context.fillStyle = "white";
+            wrapText(
+              context,
+              storyText,
+              storyX,
+              storyY,
+              storyBoxWidth,
+              storyLineHeight
+            );
+            context.restore();
+          }
+        }
+      }
+
+      // Fonction de dessin interactif
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Fond général (gris)
+        ctx.fillStyle = "#999";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        drawContent(ctx, pageX, pageY, pageScale);
+      }
+
+      // Redimensionnement du canvas interactif
+      function resizeCanvas() {
+        const container = document.getElementById("canvas-container");
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        if (pageX === 0 && pageY === 0) {
+          pageX = (canvas.width - baseWidth * pageScale) / 2;
+          pageY = (canvas.height - baseHeight * pageScale) / 2;
+        }
+        draw();
+      }
+
+      window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
+
+      // Événements pour la mise à jour dynamique
+      document.getElementById("serie-title").addEventListener("input", (e) => {
+        seriesTitle = e.target.value || "Titre";
+        draw();
+      });
+      document.getElementById("recommendation").addEventListener("input", draw);
+      document.getElementById("year").addEventListener("input", draw);
+      document
+        .getElementById("rectangle-number")
+        .addEventListener("input", draw);
+      document
+        .getElementById("rectangle-right-text")
+        .addEventListener("input", draw);
+      document.getElementById("story-text").addEventListener("input", draw);
+      document.getElementById("photo").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          photo = new Image();
+          photo.onload = draw;
+          photo.src = URL.createObjectURL(file);
+        }
+      });
+
+      // Déplacement de la page A4 dans le canvas interactif
+      let isDraggingPage = false,
+        dragStartX,
+        dragStartY;
+      canvas.addEventListener("mousedown", (e) => {
+        const rect = canvas.getBoundingClientRect(),
+          mouseX = e.clientX - rect.left,
+          mouseY = e.clientY - rect.top;
+        if (
+          mouseX >= pageX &&
+          mouseX <= pageX + baseWidth * pageScale &&
+          mouseY >= pageY &&
+          mouseY <= pageY + baseHeight * pageScale
+        ) {
+          isDraggingPage = true;
+          dragStartX = mouseX - pageX;
+          dragStartY = mouseY - pageY;
+          canvas.style.cursor = "grabbing";
+        }
+      });
+      canvas.addEventListener("mousemove", (e) => {
+        const rect = canvas.getBoundingClientRect(),
+          mouseX = e.clientX - rect.left,
+          mouseY = e.clientY - rect.top;
+        if (isDraggingPage) {
+          pageX = mouseX - dragStartX;
+          pageY = mouseY - dragStartY;
+          draw();
+        } else {
+          canvas.style.cursor =
+            mouseX >= pageX &&
+            mouseX <= pageX + baseWidth * pageScale &&
+            mouseY >= pageY &&
+            mouseY <= pageY + baseHeight * pageScale
+              ? "grab"
+              : "default";
+        }
+      });
+      canvas.addEventListener("mouseup", () => {
+        isDraggingPage = false;
+        canvas.style.cursor = "default";
+      });
+      canvas.addEventListener("mouseleave", () => {
+        isDraggingPage = false;
+        canvas.style.cursor = "default";
+      });
+      canvas.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect(),
+          mouseX = e.clientX - rect.left,
+          mouseY = e.clientY - rect.top;
+        if (
+          mouseX >= pageX &&
+          mouseX <= pageX + baseWidth * pageScale &&
+          mouseY >= pageY &&
+          mouseY <= pageY + baseHeight * pageScale
+        ) {
+          const zoomAmount = e.deltaY * -0.001,
+            newScale = Math.min(Math.max(pageScale + zoomAmount, 0.1), 3),
+            relX = mouseX - pageX,
+            relY = mouseY - pageY;
+          pageX = mouseX - (relX * newScale) / pageScale;
+          pageY = mouseY - (relY * newScale) / pageScale;
+          pageScale = newScale;
+          draw();
+        }
+      });
+
+      // Export PNG – on crée un canvas temporaire, on applique un scale
+      // pour exporter l'intégralité de la page A4 (offset 0,0, scale 1)
+      document.getElementById("export-png").addEventListener("click", () => {
+        const exportMultiplier = 3;
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = baseWidth * exportMultiplier;
+        tempCanvas.height = baseHeight * exportMultiplier;
+        const tempCtx = tempCanvas.getContext("2d");
+        // On applique un scale pour reproduire fidèlement la page (rendu en haute résolution)
+        tempCtx.scale(exportMultiplier, exportMultiplier);
+        // Dessiner avec offset 0,0 et échelle 1 (page A4 complète)
+        drawContent(tempCtx, 0, 0, 1);
+        const link = document.createElement("a");
+        link.href = tempCanvas.toDataURL("image/png");
+        link.download = "document_a4.png";
+        link.click();
+      });
+    </script>
+  </body>
+</html>
