@@ -48,17 +48,15 @@
         background-color: #222;
         color: #fff;
         font-size: 14px;
-        transition: border 0.3s ease, background-color 0.3s ease;
+        transition: background-color 0.3s ease;
         resize: none;
-        border: solid 1px transparent;
       }
 
       /* Effet focus */
       #controls input:focus,
       #controls textarea:focus {
         outline: none;
-        border: solid 1px #e50914;
-        background-color: #1e1e1e;
+        background-color: #444444;
       }
 
       /* Style du bouton */
@@ -136,7 +134,7 @@
 
       textarea::-webkit-scrollbar-track {
         background: #222;
-        border-radius: 10px;
+        border-radius:10px;
       }
 
       textarea::-webkit-scrollbar-thumb {
@@ -149,6 +147,7 @@
       /* Pour Firefox, on retire les flèches natives */
       input[type="number"] {
         -moz-appearance: textfield;
+        appearance: textfield;
       }
 
       /* Pour Chrome, Edge, Safari : on masque les flèches natives */
