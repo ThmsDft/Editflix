@@ -72,12 +72,19 @@
         value="crises, pleurs"
         placeholder="Texte à droite"
       />
-      <!-- Nouvel input pour le texte Distribution -->
+      <!-- Input pour le texte Distribution -->
       <input
         type="text"
         id="distribution-text"
         value="Juliann Dufourt, Thomas Dufourt, Laura Santos, plus"
         placeholder="Texte de distribution"
+      />
+      <!-- Input pour le texte Genres -->
+      <input
+        type="text"
+        id="genres-text"
+        value="séries dramatiques, français"
+        placeholder="Texte de genres"
       />
       <!-- Zone de saisie pour le texte d'histoire -->
       <textarea id="story-text" rows="4" placeholder="Texte d'histoire">
@@ -138,31 +145,25 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
         context.fillText(line, x, y);
       }
 
-      // Fonction pour dessiner un texte multi-couleur avec retour à la ligne automatique.
-      // Les segments sont un tableau d'objets {text, style}
-      // Le texte sera découpé par mots et affiché dans une zone d'une largeur max donnée.
-      // Le bas du bloc sera aligné sur bottomY.
-      function drawWrappedMultiColorText(
+      // Fonction pour dessiner un texte multi-couleur avec retour à la ligne automatique
+      // en alignement TOP (la première ligne commence à topY et les lignes suivantes se placent en dessous).
+      function drawWrappedMultiColorTextTop(
         context,
         segments,
         x,
-        bottomY,
+        topY,
         maxWidth,
         lineHeight
       ) {
-        context.font = "600 " + lineHeight / 1.2 + "px 'Inter', sans-serif"; // on retrouve la taille via lineHeight
-        // Construction d'un tableau de "mots" avec leur style associé.
+        context.font = "600 " + lineHeight / 1.2 + "px 'Inter', sans-serif";
         let words = [];
-        segments.forEach((seg, segIndex) => {
-          // Si plusieurs segments, on ajoute un espace avant les segments suivants.
+        segments.forEach((seg) => {
           let segWords = seg.text.split(" ");
           segWords.forEach((w, index) => {
             let wordText = (index === 0 ? "" : " ") + w;
             words.push({ text: wordText, style: seg.style });
           });
         });
-
-        // Découpage en lignes
         let lines = [];
         let currentLine = [];
         let currentLineWidth = 0;
@@ -182,15 +183,9 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
         if (currentLine.length > 0) {
           lines.push(currentLine);
         }
-
-        // Calcul de la position verticale pour aligner le bas du bloc sur bottomY
-        const totalHeight = lines.length * lineHeight;
-        const startY = bottomY - totalHeight;
-
-        // Dessin ligne par ligne en respectant la couleur de chaque mot
         lines.forEach((line, i) => {
           let currentX = x;
-          let lineY = startY + i * lineHeight;
+          let lineY = topY + i * lineHeight;
           line.forEach((word) => {
             context.fillStyle = word.style;
             context.fillText(word.text, currentX, lineY);
@@ -199,9 +194,41 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
         });
       }
 
-      // Fonction de dessin commune
-      // pX, pY : offset du "page" sur le contexte fourni
-      // scale : facteur d'échelle (1 pour export complet, ou pageScale pour l'interactif)
+      // Fonction pour découper le texte multi-couleur en lignes (utile pour calculer la hauteur)
+      function getWrappedLines(context, segments, maxWidth) {
+        let words = [];
+        segments.forEach((seg) => {
+          let segWords = seg.text.split(" ");
+          segWords.forEach((w, index) => {
+            let wordText = (index === 0 ? "" : " ") + w;
+            words.push({ text: wordText, style: seg.style });
+          });
+        });
+        let lines = [];
+        let currentLine = [];
+        let currentLineWidth = 0;
+        words.forEach((word) => {
+          let wordWidth = context.measureText(word.text).width;
+          if (
+            currentLineWidth + wordWidth > maxWidth &&
+            currentLine.length > 0
+          ) {
+            lines.push(currentLine);
+            currentLine = [];
+            currentLineWidth = 0;
+          }
+          currentLine.push(word);
+          currentLineWidth += wordWidth;
+        });
+        if (currentLine.length > 0) {
+          lines.push(currentLine);
+        }
+        return lines;
+      }
+
+      // Fonction de dessin principale
+      // pX, pY : offset de la page sur le contexte fourni
+      // scale : facteur d'échelle (1 pour l'export complet, ou pageScale pour l'interactif)
       function drawContent(context, pX, pY, scale) {
         const pageW = baseWidth * scale,
           pageH = baseHeight * scale;
@@ -322,25 +349,54 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
           context.drawImage(hdSvgImage, iconX, iconY, iconWidth, iconHeight);
         }
 
-        // Bloc de texte "Distribution" en texte continu avec retour à la ligne si nécessaire
-        const distributionWidth = baseWidth * 0.28 * scale; // 25% de la largeur A4
-        const distributionX = pX + pageW - distributionWidth - recMargin;
-        const distributionFontSize = 8.8 * scale;
-        const distributionLineHeight = distributionFontSize * 1.2;
-        // Préparer les segments (le premier en #5F5F5F, le second en #B5B5B5)
+        // Bloc de texte "Distribution : ..." en alignement TOP
+        const distributionWidth = baseWidth * 0.28 * scale,
+          distributionX = pX + pageW - distributionWidth - recMargin,
+          distributionFontSize = 8.8 * scale,
+          distributionLineHeight = distributionFontSize * 1.2;
         const distributionDynamic =
           document.getElementById("distribution-text").value ||
           "Juliann Dufourt, Thomas Dufourt, Laura Santos, plus";
-        const segments = [
+        const distributionSegments = [
           { text: "Distribution :", style: "#5F5F5F" },
           { text: " " + distributionDynamic, style: "#B5B5B5" },
         ];
-        // Aligner le bas du bloc sur la ligne recY (pour rester au même niveau que le texte "Recommandé...")
-        drawWrappedMultiColorText(
+        // Ici, nous fixons le point de départ du bloc (la première ligne) à recY.
+        const distributionTopY = recY * 0.98;
+        drawWrappedMultiColorTextTop(
           context,
-          segments,
+          distributionSegments,
           distributionX,
-          recY,
+          distributionTopY,
+          distributionWidth,
+          distributionLineHeight
+        );
+
+        // Calcul de la hauteur du bloc Distribution
+        const distributionLines = getWrappedLines(
+          context,
+          distributionSegments,
+          distributionWidth
+        );
+        const distributionBlockHeight =
+          distributionLines.length * distributionLineHeight;
+
+        // Bloc de texte "Genres : ..." en alignement TOP, positionné juste en dessous du bloc Distribution
+        const genresDynamic =
+          document.getElementById("genres-text").value ||
+          "séries dramatiques, français";
+        const genresSegments = [
+          { text: "Genres :", style: "#5F5F5F" },
+          { text: " " + genresDynamic, style: "#B5B5B5" },
+        ];
+        const genresMargin = 13 * scale; // marge entre les blocs
+        const genresTopY =
+          distributionTopY + distributionBlockHeight + genresMargin;
+        drawWrappedMultiColorTextTop(
+          context,
+          genresSegments,
+          distributionX,
+          genresTopY,
           distributionWidth,
           distributionLineHeight
         );
@@ -459,7 +515,6 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
       // Fonction de dessin interactif
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // Fond général (gris)
         ctx.fillStyle = "#999";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         drawContent(ctx, pageX, pageY, pageScale);
@@ -496,6 +551,7 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
       document
         .getElementById("distribution-text")
         .addEventListener("input", draw);
+      document.getElementById("genres-text").addEventListener("input", draw);
       document.getElementById("story-text").addEventListener("input", draw);
       document.getElementById("photo").addEventListener("change", (e) => {
         const file = e.target.files[0];
@@ -574,16 +630,14 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
         }
       });
 
-      // Export PNG – on crée un canvas temporaire en haute résolution
+      // Export PNG – création d'un canvas temporaire en haute résolution
       document.getElementById("export-png").addEventListener("click", () => {
         const exportMultiplier = 3;
         const tempCanvas = document.createElement("canvas");
         tempCanvas.width = baseWidth * exportMultiplier;
         tempCanvas.height = baseHeight * exportMultiplier;
         const tempCtx = tempCanvas.getContext("2d");
-        // Appliquer une échelle pour un rendu haute résolution
         tempCtx.scale(exportMultiplier, exportMultiplier);
-        // Dessiner la page A4 complète avec offset (0,0) et échelle 1
         drawContent(tempCtx, 0, 0, 1);
         const link = document.createElement("a");
         link.href = tempCanvas.toDataURL("image/png");
