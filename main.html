@@ -134,7 +134,7 @@
 
       textarea::-webkit-scrollbar-track {
         background: #222;
-        border-radius:10px;
+        border-radius: 10px;
       }
 
       textarea::-webkit-scrollbar-thumb {
@@ -197,7 +197,7 @@
   <body>
     <div id="controls">
       <label for="serie-title">Titre de la série</label>
-      <input type="text" id="serie-title" value="Titre" />
+      <input type="text" id="serie-title" value="" />
 
       <label>Image de fond</label>
       <!-- Bouton personnalisé pour l'input file -->
@@ -220,20 +220,19 @@
       <input
         type="text"
         id="rectangle-right-text"
-        value="crises, pleurs"
+        value=""
         placeholder="Texte à droite"
       />
 
       <label for="story-text">Synopsis</label>
       <textarea id="story-text" rows="4" placeholder="Synopsis">
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque fringilla eros tellus, nec elementum orci efficitur quis. Curabitur in efficitur enim. Fusce fermentum ultricies porttitor. Nunc consectetur tempus lacus a rhoncus. Morbi sit amet leo neque. Curabitur imperdiet augue justo, vel vehicula est malesuada ac.
       </textarea>
 
       <label for="distribution-text">Distribution</label>
       <input
         type="text"
         id="distribution-text"
-        value="Juliann Dufourt, Thomas Dufourt, Laura Santos, plus"
+        value=""
         placeholder="Texte de distribution"
       />
 
@@ -259,7 +258,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque fringilla eros 
         pageY = 0,
         pageScale = 1;
       // Contenu dynamique
-      let seriesTitle = "Titre",
+      let seriesTitle = "",
         photo = null;
 
       // Chargement des images SVG
@@ -485,7 +484,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque fringilla eros 
           distributionLineHeight = distributionFontSize * 1.2;
         const distributionDynamic =
           document.getElementById("distribution-text").value ||
-          "Juliann Dufourt, Thomas Dufourt, Laura Santos, plus";
+          "";
         const distributionSegments = [
           { text: "Distribution :", style: "#5F5F5F" },
           { text: " " + distributionDynamic, style: "#B5B5B5" },
@@ -513,7 +512,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque fringilla eros 
         // Bloc de texte "Genres : ..." en alignement TOP, placé sous Distribution
         const genresDynamic =
           document.getElementById("genres-text").value ||
-          "séries dramatiques, français";
+          "";
         const genresSegments = [
           { text: "Genres :", style: "#5F5F5F" },
           { text: " " + genresDynamic, style: "#B5B5B5" },
@@ -552,7 +551,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque fringilla eros 
             desiredRectHeight
           );
           const rectValue =
-              document.getElementById("rectangle-number").value || "12",
+              document.getElementById("rectangle-number").value || "16",
             rectText = rectValue + "+";
           context.save();
           context.font =
@@ -569,7 +568,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque fringilla eros 
 
           const rightText =
             document.getElementById("rectangle-right-text").value ||
-            "crises, pleurs";
+            "";
           context.save();
           context.font =
             "600 " + desiredRectHeight * 0.8 + "px 'Inter', sans-serif";
@@ -622,9 +621,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque fringilla eros 
               storyBoxWidth = pageW - recMargin * 8.2,
               storyFontSize = 10 * scale,
               storyLineHeight = storyFontSize * 1.2,
-              storyText =
-                document.getElementById("story-text").value ||
-                "Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et demi, qui n'hésite pas à exprimer ses souhaits. Bien que la vie ne soit pas toujours facile, notamment lorsqu'il s'agit de gérer des parents bien intentionnés mais parfois maladroits, Juliann ne se décourage jamais et persévère jusqu'à l'obtention de ce qu'il désire vraiment.";
+              storyText = document.getElementById("story-text").value || "";
             context.save();
             context.font = storyFontSize + "px 'Inter', sans-serif";
             context.fillStyle = "white";
@@ -666,7 +663,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque fringilla eros 
 
       // Événements pour la mise à jour dynamique
       document.getElementById("serie-title").addEventListener("input", (e) => {
-        seriesTitle = e.target.value || "Titre";
+        seriesTitle = e.target.value || "";
         draw();
       });
       document.getElementById("recommendation").addEventListener("input", draw);
@@ -766,6 +763,52 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque fringilla eros 
         link.href = tempCanvas.toDataURL("image/png");
         link.download = "document_a4.png";
         link.click();
+      });
+    </script>
+
+    <script>
+      window.addEventListener("load", () => {
+        fetch("exemples.json")
+          .then((response) => response.json())
+          .then((data) => {
+            const exemples = data.exemples;
+            const exempleChoisi =
+              exemples[Math.floor(Math.random() * exemples.length)];
+
+            // Mise à jour des inputs
+            document.getElementById("serie-title").value =
+              exempleChoisi.serieTitle;
+            seriesTitle = exempleChoisi.serieTitle; // Mise à jour de la variable globale
+            document.getElementById("serie-title").value =
+              exempleChoisi.serieTitle;
+            document.getElementById("recommendation").value =
+              exempleChoisi.recommendation;
+            document.getElementById("year").value = exempleChoisi.year;
+            document.getElementById("rectangle-number").value =
+              exempleChoisi["rectangle-number"];
+            document.getElementById("rectangle-right-text").value =
+              exempleChoisi["rectangle-right-text"];
+            document.getElementById("story-text").value =
+              exempleChoisi["story-text"];
+            document.getElementById("distribution-text").value =
+              exempleChoisi["distribution-text"];
+            document.getElementById("genres-text").value =
+              exempleChoisi["genres-text"];
+
+            // Si une image de fond est définie dans le JSON, on la charge
+            if (exempleChoisi.photo) {
+              photo = new Image();
+              photo.onload = draw; // redraw une fois l'image chargée
+              photo.src = exempleChoisi.photo;
+            } else {
+              photo = null;
+              draw();
+            }
+          })
+          .catch((error) => {
+            console.error("Erreur lors du chargement des exemples :", error);
+            draw();
+          });
       });
     </script>
   </body>

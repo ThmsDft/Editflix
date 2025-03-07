@@ -1,0 +1,48 @@
+{
+  "exemples": [
+    {
+      "serieTitle": "POWER",
+      "recommendation": "98",
+      "year": "2025",
+      "rectangle-number": "18",
+      "rectangle-right-text": "Ambition, Pouvoir",
+      "story-text": "Un jeune entrepreneur ambitieux hérite du contrôle d'une grande entreprise et doit naviguer dans un monde impitoyable de trahisons et rivalités pour asseoir son pouvoir.",
+      "distribution-text": "Maxime Durand, Camille Lefèvre, Julien Morel",
+      "genres-text": "drame, pouvoir, entreprise",
+      "photo": "img/power.png"
+    },
+    {
+      "serieTitle": "ENTRE NOUS",
+      "recommendation": "95",
+      "year": "2024",
+      "rectangle-number": "12",
+      "rectangle-right-text": "Amour, Passion",
+      "story-text": "Dans une rencontre inattendue, un homme et une femme se retrouvent liés par un amour sincère, défiant les obstacles du destin et les conventions sociales.",
+      "distribution-text": "Alice Dupont, Marc Lemaire, Catherine Rousseau",
+      "genres-text": "romance, drame",
+      "photo": "img/love.jpg"
+    },
+    {
+      "serieTitle": "ICE",
+      "recommendation": "88",
+      "year": "2023",
+      "rectangle-number": "15",
+      "rectangle-right-text": "Aventure, Survie",
+      "story-text": "Sur les chemins glacés d'une montagne majestueuse, un homme marche seul, affrontant le froid extrême et la solitude dans une quête de liberté.",
+      "distribution-text": "Lucas Moreau, Jeanne Petit",
+      "genres-text": "aventure, thriller",
+      "photo": "img/ice.jpg"
+    },
+    {
+      "serieTitle": "PRISON",
+      "recommendation": "82",
+      "year": "2025",
+      "rectangle-number": "16",
+      "rectangle-right-text": "Action, Crime",
+      "story-text": "Dans une ambiance sombre et oppressante, un policier escortant un détenu énigmatique se retrouve au cœur d'une intrigue complexe dans une prison impitoyable.",
+      "distribution-text": "Jean Martin, Pierre Dubois",
+      "genres-text": "action, thriller, policier",
+      "photo": "img/prison.jpg"
+    }
+  ]
+}
