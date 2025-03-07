@@ -78,6 +78,31 @@
         background-color: #b20710;
       }
 
+      /* Styles pour le bouton personnalisé du fichier */
+      .custom-file {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .custom-file #custom-button {
+        margin-bottom: 10px;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #e50914;
+        color: #fff;
+        font-size: 12px;
+        cursor: pointer;
+        min-width: 130px;
+      }
+      .custom-file #custom-button:hover {
+        background-color: #b20710;
+      }
+      .custom-file #custom-text {
+        color: #fff;
+        font-size: 12px;
+      }
+
       /* Zone du canvas */
       #canvas-container {
         flex: 1;
@@ -103,27 +128,22 @@
       <label for="serie-title">Titre de la série</label>
       <input type="text" id="serie-title" value="Titre" />
 
-      <label for="photo">Image de fond</label>
-      <input type="file" id="photo" accept="image/*" />
+      <label>Image de fond</label>
+      <!-- Bouton personnalisé pour l'input file -->
+      <div class="custom-file">
+        <input type="file" id="photo" accept="image/*" style="display: none" />
+        <button type="button" id="custom-button">Choisir un fichier</button>
+        <span id="custom-text">Aucun fichier sélectionné</span>
+      </div>
 
       <label for="recommendation">Pourcentage recommandé</label>
-      <input
-        type="number"
-        id="recommendation"
-        value="98"
-        placeholder="98"
-      />
+      <input type="number" id="recommendation" value="98" placeholder="98" />
 
       <label for="year">Année</label>
       <input type="number" id="year" value="2025" placeholder="2025" />
 
       <label for="rectangle-number">Âge recommandé</label>
-      <input
-        type="number"
-        id="rectangle-number"
-        value="12"
-        placeholder="12"
-      />
+      <input type="number" id="rectangle-number" value="12" placeholder="12" />
 
       <label for="rectangle-right-text">Avertissement de contenu</label>
       <input
@@ -135,7 +155,7 @@
 
       <label for="story-text">Synopsis</label>
       <textarea id="story-text" rows="4" placeholder="Synopsis">
-Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et demi, qui n'hésite pas à exprimer ses souhaits. Bien que la vie ne soit pas toujours facile, notamment lorsqu'il s'agit de gérer des parents bien intentionnés mais parfois maladroits, Juliann ne se décourage jamais et persévère jusqu'à l'obtention de ce qu'il désire vraiment.
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque fringilla eros tellus, nec elementum orci efficitur quis. Curabitur in efficitur enim. Fusce fermentum ultricies porttitor. Nunc consectetur tempus lacus a rhoncus. Morbi sit amet leo neque. Curabitur imperdiet augue justo, vel vehicula est malesuada ac.
       </textarea>
 
       <label for="distribution-text">Distribution</label>
@@ -591,12 +611,23 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
         .addEventListener("input", draw);
       document.getElementById("genres-text").addEventListener("input", draw);
       document.getElementById("story-text").addEventListener("input", draw);
+
+      // Bouton personnalisé : déclencher l'input file
+      document.getElementById("custom-button").addEventListener("click", () => {
+        document.getElementById("photo").click();
+      });
+
+      // Mise à jour de l'affichage du nom du fichier choisi
       document.getElementById("photo").addEventListener("change", (e) => {
         const file = e.target.files[0];
+        const customText = document.getElementById("custom-text");
         if (file) {
+          customText.textContent = file.name;
           photo = new Image();
           photo.onload = draw;
           photo.src = URL.createObjectURL(file);
+        } else {
+          customText.textContent = "Aucun fichier sélectionné";
         }
       });
 
