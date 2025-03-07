@@ -10,87 +10,150 @@
       rel="stylesheet"
     />
     <style>
+      /* Style global */
       body {
         margin: 0;
         padding: 0;
         display: flex;
         height: 100vh;
-        background-color: #ccc;
-        gap: 10px;
+        background-color: #141414;
+        font-family: "Inter", sans-serif;
         overflow: hidden;
       }
+
+      /* Panneau de contrôles */
       #controls {
         width: 300px;
-        padding: 10px;
-        background: #fff;
+        padding: 20px;
+        background-color: #141414;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 4px;
+        border-right: 1px solid #333;
       }
+
+      /* Labels */
+      #controls label {
+        font-size: 13px;
+        color: #bbb;
+      }
+
+      /* Style commun aux inputs, textarea et bouton */
+      #controls input,
+      #controls textarea {
+        margin-bottom: 10px;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #222;
+        color: #fff;
+        font-size: 14px;
+        transition: border 0.3s ease, background-color 0.3s ease;
+        resize: none;
+        border: solid 1px transparent;
+      }
+
+      /* Effet focus */
+      #controls input:focus,
+      #controls textarea:focus {
+        outline: none;
+        border: solid 1px #e50914;
+        background-color: #1e1e1e;
+      }
+
+      /* Style du bouton */
+      #controls button {
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #e50914;
+        color: #fff;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      #controls button:hover {
+        background-color: #b20710;
+      }
+
+      /* Zone du canvas */
       #canvas-container {
         flex: 1;
         position: relative;
         overflow: hidden;
+        background-color: #000;
       }
+
       canvas {
-        background: #eee;
+        background: #000;
         width: 100%;
         height: 100%;
       }
-      input,
-      textarea,
-      button {
-        padding: 8px;
-        font-size: 14px;
-      }
+
+      /* Pour améliorer l'expérience utilisateur sur textarea */
       textarea {
-        resize: vertical;
+        min-height: 100px;
       }
     </style>
   </head>
   <body>
     <div id="controls">
-      <!-- Champs de contrôle -->
+      <label for="serie-title">Titre de la série</label>
       <input type="text" id="serie-title" value="Titre" />
+
+      <label for="photo">Image de fond</label>
+      <input type="file" id="photo" accept="image/*" />
+
+      <label for="recommendation">Pourcentage recommandé</label>
       <input
         type="number"
         id="recommendation"
         value="98"
         placeholder="Pourcentage"
       />
-      <input type="text" id="year" value="2024" placeholder="Année" />
-      <!-- Inputs pour le rectangle -->
+
+      <label for="year">Année</label>
+      <input type="number" id="year" value="2025" placeholder="Année" />
+
+      <label for="rectangle-number">Âge recommandé</label>
       <input
         type="number"
         id="rectangle-number"
         value="12"
         placeholder="Nombre"
       />
+
+      <label for="rectangle-right-text">Avertissement de contenu</label>
       <input
         type="text"
         id="rectangle-right-text"
         value="crises, pleurs"
         placeholder="Texte à droite"
       />
-      <!-- Input pour le texte Distribution -->
+
+      <label for="story-text">Histoire</label>
+      <textarea id="story-text" rows="4" placeholder="Texte d'histoire">
+Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et demi, qui n'hésite pas à exprimer ses souhaits. Bien que la vie ne soit pas toujours facile, notamment lorsqu'il s'agit de gérer des parents bien intentionnés mais parfois maladroits, Juliann ne se décourage jamais et persévère jusqu'à l'obtention de ce qu'il désire vraiment.
+      </textarea>
+
+      <label for="distribution-text">Distribution</label>
       <input
         type="text"
         id="distribution-text"
         value="Juliann Dufourt, Thomas Dufourt, Laura Santos, plus"
         placeholder="Texte de distribution"
       />
-      <!-- Input pour le texte Genres -->
+
+      <label for="genres-text">Genres</label>
       <input
         type="text"
         id="genres-text"
         value="séries dramatiques, français"
         placeholder="Texte de genres"
       />
-      <!-- Zone de saisie pour le texte d'histoire -->
-      <textarea id="story-text" rows="4" placeholder="Texte d'histoire">
-Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et demi, qui n'hésite pas à exprimer ses souhaits. Bien que la vie ne soit pas toujours facile, notamment lorsqu'il s'agit de gérer des parents bien intentionnés mais parfois maladroits, Juliann ne se décourage jamais et persévère jusqu'à l'obtention de ce qu'il désire vraiment.
-      </textarea>
-      <input type="file" id="photo" accept="image/*" />
+
       <button id="export-png">Exporter en PNG</button>
     </div>
     <div id="canvas-container">
