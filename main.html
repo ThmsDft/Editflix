@@ -145,8 +145,44 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
         context.fillText(line, x, y);
       }
 
-      // Fonction pour dessiner un texte multi-couleur avec retour à la ligne automatique
-      // en alignement TOP (la première ligne commence à topY et les lignes suivantes se placent en dessous).
+      // Fonctions de découpage et dessin du texte multi-couleur en alignement TOP,
+      // ajoutant un espace entre les mots sur la même ligne, mais sans espace en début de ligne.
+      function getWrappedLines(context, segments, maxWidth) {
+        let words = [];
+        segments.forEach((seg) => {
+          let segWords = seg.text.split(" ");
+          segWords.forEach((w) => {
+            words.push({ text: w, style: seg.style });
+          });
+        });
+        let lines = [];
+        let currentLine = [];
+        let currentLineWidth = 0;
+        const spaceWidth = context.measureText(" ").width;
+        words.forEach((word) => {
+          const wordWidth = context.measureText(word.text).width;
+          const additionalSpace = currentLine.length > 0 ? spaceWidth : 0;
+          if (
+            currentLineWidth + additionalSpace + wordWidth > maxWidth &&
+            currentLine.length > 0
+          ) {
+            lines.push(currentLine);
+            currentLine = [];
+            currentLineWidth = 0;
+          }
+          if (currentLine.length > 0) {
+            currentLine.push({ text: " ", style: word.style });
+            currentLineWidth += spaceWidth;
+          }
+          currentLine.push(word);
+          currentLineWidth += wordWidth;
+        });
+        if (currentLine.length > 0) {
+          lines.push(currentLine);
+        }
+        return lines;
+      }
+
       function drawWrappedMultiColorTextTop(
         context,
         segments,
@@ -156,33 +192,7 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
         lineHeight
       ) {
         context.font = "600 " + lineHeight / 1.2 + "px 'Inter', sans-serif";
-        let words = [];
-        segments.forEach((seg) => {
-          let segWords = seg.text.split(" ");
-          segWords.forEach((w, index) => {
-            let wordText = (index === 0 ? "" : " ") + w;
-            words.push({ text: wordText, style: seg.style });
-          });
-        });
-        let lines = [];
-        let currentLine = [];
-        let currentLineWidth = 0;
-        words.forEach((word) => {
-          let wordWidth = context.measureText(word.text).width;
-          if (
-            currentLineWidth + wordWidth > maxWidth &&
-            currentLine.length > 0
-          ) {
-            lines.push(currentLine);
-            currentLine = [];
-            currentLineWidth = 0;
-          }
-          currentLine.push(word);
-          currentLineWidth += wordWidth;
-        });
-        if (currentLine.length > 0) {
-          lines.push(currentLine);
-        }
+        const lines = getWrappedLines(context, segments, maxWidth);
         lines.forEach((line, i) => {
           let currentX = x;
           let lineY = topY + i * lineHeight;
@@ -194,41 +204,7 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
         });
       }
 
-      // Fonction pour découper le texte multi-couleur en lignes (utile pour calculer la hauteur)
-      function getWrappedLines(context, segments, maxWidth) {
-        let words = [];
-        segments.forEach((seg) => {
-          let segWords = seg.text.split(" ");
-          segWords.forEach((w, index) => {
-            let wordText = (index === 0 ? "" : " ") + w;
-            words.push({ text: wordText, style: seg.style });
-          });
-        });
-        let lines = [];
-        let currentLine = [];
-        let currentLineWidth = 0;
-        words.forEach((word) => {
-          let wordWidth = context.measureText(word.text).width;
-          if (
-            currentLineWidth + wordWidth > maxWidth &&
-            currentLine.length > 0
-          ) {
-            lines.push(currentLine);
-            currentLine = [];
-            currentLineWidth = 0;
-          }
-          currentLine.push(word);
-          currentLineWidth += wordWidth;
-        });
-        if (currentLine.length > 0) {
-          lines.push(currentLine);
-        }
-        return lines;
-      }
-
       // Fonction de dessin principale
-      // pX, pY : offset de la page sur le contexte fourni
-      // scale : facteur d'échelle (1 pour l'export complet, ou pageScale pour l'interactif)
       function drawContent(context, pX, pY, scale) {
         const pageW = baseWidth * scale,
           pageH = baseHeight * scale;
@@ -324,7 +300,6 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
         const width3 = context.measureText(recText2).width;
         context.fillStyle = "#B5B5B5";
         context.fillText(recYear, recX + width1 + width2 + width3, recY);
-        // Stocker la largeur du texte "2024"
         const widthRecYear = context.measureText(recYear).width;
         context.restore();
 
@@ -361,7 +336,7 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
           { text: "Distribution :", style: "#5F5F5F" },
           { text: " " + distributionDynamic, style: "#B5B5B5" },
         ];
-        // Ici, nous fixons le point de départ du bloc (la première ligne) à recY.
+        // Point de départ fixe en haut pour le bloc Distribution
         const distributionTopY = recY * 0.98;
         drawWrappedMultiColorTextTop(
           context,
@@ -381,7 +356,7 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
         const distributionBlockHeight =
           distributionLines.length * distributionLineHeight;
 
-        // Bloc de texte "Genres : ..." en alignement TOP, positionné juste en dessous du bloc Distribution
+        // Bloc de texte "Genres : ..." en alignement TOP, placé sous Distribution
         const genresDynamic =
           document.getElementById("genres-text").value ||
           "séries dramatiques, français";
@@ -389,7 +364,7 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
           { text: "Genres :", style: "#5F5F5F" },
           { text: " " + genresDynamic, style: "#B5B5B5" },
         ];
-        const genresMargin = 13 * scale; // marge entre les blocs
+        const genresMargin = 13 * scale;
         const genresTopY =
           distributionTopY + distributionBlockHeight + genresMargin;
         drawWrappedMultiColorTextTop(
@@ -562,72 +537,55 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
         }
       });
 
-      // Déplacement de la page A4 dans le canvas interactif
+      // Permettre le pan même en dehors du A4 et afficher le curseur en main
       let isDraggingPage = false,
         dragStartX,
         dragStartY;
       canvas.addEventListener("mousedown", (e) => {
-        const rect = canvas.getBoundingClientRect(),
-          mouseX = e.clientX - rect.left,
-          mouseY = e.clientY - rect.top;
-        if (
-          mouseX >= pageX &&
-          mouseX <= pageX + baseWidth * pageScale &&
-          mouseY >= pageY &&
-          mouseY <= pageY + baseHeight * pageScale
-        ) {
-          isDraggingPage = true;
-          dragStartX = mouseX - pageX;
-          dragStartY = mouseY - pageY;
-          canvas.style.cursor = "grabbing";
-        }
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        isDraggingPage = true;
+        dragStartX = mouseX - pageX;
+        dragStartY = mouseY - pageY;
+        canvas.style.cursor = "grabbing";
       });
       canvas.addEventListener("mousemove", (e) => {
-        const rect = canvas.getBoundingClientRect(),
-          mouseX = e.clientX - rect.left,
-          mouseY = e.clientY - rect.top;
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
         if (isDraggingPage) {
           pageX = mouseX - dragStartX;
           pageY = mouseY - dragStartY;
           draw();
+          canvas.style.cursor = "grabbing";
         } else {
-          canvas.style.cursor =
-            mouseX >= pageX &&
-            mouseX <= pageX + baseWidth * pageScale &&
-            mouseY >= pageY &&
-            mouseY <= pageY + baseHeight * pageScale
-              ? "grab"
-              : "default";
+          canvas.style.cursor = "grab";
         }
       });
       canvas.addEventListener("mouseup", () => {
         isDraggingPage = false;
-        canvas.style.cursor = "default";
+        canvas.style.cursor = "grab";
       });
       canvas.addEventListener("mouseleave", () => {
         isDraggingPage = false;
-        canvas.style.cursor = "default";
+        canvas.style.cursor = "grab";
       });
+
+      // Permettre le zoom même si le curseur est en dehors du A4
       canvas.addEventListener("wheel", (e) => {
         e.preventDefault();
-        const rect = canvas.getBoundingClientRect(),
-          mouseX = e.clientX - rect.left,
-          mouseY = e.clientY - rect.top;
-        if (
-          mouseX >= pageX &&
-          mouseX <= pageX + baseWidth * pageScale &&
-          mouseY >= pageY &&
-          mouseY <= pageY + baseHeight * pageScale
-        ) {
-          const zoomAmount = e.deltaY * -0.001,
-            newScale = Math.min(Math.max(pageScale + zoomAmount, 0.1), 3),
-            relX = mouseX - pageX,
-            relY = mouseY - pageY;
-          pageX = mouseX - (relX * newScale) / pageScale;
-          pageY = mouseY - (relY * newScale) / pageScale;
-          pageScale = newScale;
-          draw();
-        }
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        const zoomAmount = e.deltaY * -0.001;
+        const newScale = Math.min(Math.max(pageScale + zoomAmount, 0.1), 3);
+        const relX = mouseX - pageX;
+        const relY = mouseY - pageY;
+        pageX = mouseX - (relX * newScale) / pageScale;
+        pageY = mouseY - (relY * newScale) / pageScale;
+        pageScale = newScale;
+        draw();
       });
 
       // Export PNG – création d'un canvas temporaire en haute résolution
