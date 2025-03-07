@@ -72,6 +72,13 @@
         value="crises, pleurs"
         placeholder="Texte à droite"
       />
+      <!-- Nouvel input pour le texte Distribution -->
+      <input
+        type="text"
+        id="distribution-text"
+        value="Juliann Dufourt, Thomas Dufourt, Laura Santos, plus"
+        placeholder="Texte de distribution"
+      />
       <!-- Zone de saisie pour le texte d'histoire -->
       <textarea id="story-text" rows="4" placeholder="Texte d'histoire">
 Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et demi, qui n'hésite pas à exprimer ses souhaits. Bien que la vie ne soit pas toujours facile, notamment lorsqu'il s'agit de gérer des parents bien intentionnés mais parfois maladroits, Juliann ne se décourage jamais et persévère jusqu'à l'obtention de ce qu'il désire vraiment.
@@ -114,7 +121,7 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
       const canvas = document.getElementById("editor");
       const ctx = canvas.getContext("2d");
 
-      // Fonction utilitaire pour envelopper du texte
+      // Fonction utilitaire pour envelopper du texte (monochrome)
       function wrapText(context, text, x, y, maxWidth, lineHeight) {
         const words = text.split(" ");
         let line = "";
@@ -129,6 +136,67 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
           }
         }
         context.fillText(line, x, y);
+      }
+
+      // Fonction pour dessiner un texte multi-couleur avec retour à la ligne automatique.
+      // Les segments sont un tableau d'objets {text, style}
+      // Le texte sera découpé par mots et affiché dans une zone d'une largeur max donnée.
+      // Le bas du bloc sera aligné sur bottomY.
+      function drawWrappedMultiColorText(
+        context,
+        segments,
+        x,
+        bottomY,
+        maxWidth,
+        lineHeight
+      ) {
+        context.font = "600 " + lineHeight / 1.2 + "px 'Inter', sans-serif"; // on retrouve la taille via lineHeight
+        // Construction d'un tableau de "mots" avec leur style associé.
+        let words = [];
+        segments.forEach((seg, segIndex) => {
+          // Si plusieurs segments, on ajoute un espace avant les segments suivants.
+          let segWords = seg.text.split(" ");
+          segWords.forEach((w, index) => {
+            let wordText = (index === 0 ? "" : " ") + w;
+            words.push({ text: wordText, style: seg.style });
+          });
+        });
+
+        // Découpage en lignes
+        let lines = [];
+        let currentLine = [];
+        let currentLineWidth = 0;
+        words.forEach((word) => {
+          let wordWidth = context.measureText(word.text).width;
+          if (
+            currentLineWidth + wordWidth > maxWidth &&
+            currentLine.length > 0
+          ) {
+            lines.push(currentLine);
+            currentLine = [];
+            currentLineWidth = 0;
+          }
+          currentLine.push(word);
+          currentLineWidth += wordWidth;
+        });
+        if (currentLine.length > 0) {
+          lines.push(currentLine);
+        }
+
+        // Calcul de la position verticale pour aligner le bas du bloc sur bottomY
+        const totalHeight = lines.length * lineHeight;
+        const startY = bottomY - totalHeight;
+
+        // Dessin ligne par ligne en respectant la couleur de chaque mot
+        lines.forEach((line, i) => {
+          let currentX = x;
+          let lineY = startY + i * lineHeight;
+          line.forEach((word) => {
+            context.fillStyle = word.style;
+            context.fillText(word.text, currentX, lineY);
+            currentX += context.measureText(word.text).width;
+          });
+        });
       }
 
       // Fonction de dessin commune
@@ -254,6 +322,29 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
           context.drawImage(hdSvgImage, iconX, iconY, iconWidth, iconHeight);
         }
 
+        // Bloc de texte "Distribution" en texte continu avec retour à la ligne si nécessaire
+        const distributionWidth = baseWidth * 0.28 * scale; // 25% de la largeur A4
+        const distributionX = pX + pageW - distributionWidth - recMargin;
+        const distributionFontSize = 8.8 * scale;
+        const distributionLineHeight = distributionFontSize * 1.2;
+        // Préparer les segments (le premier en #5F5F5F, le second en #B5B5B5)
+        const distributionDynamic =
+          document.getElementById("distribution-text").value ||
+          "Juliann Dufourt, Thomas Dufourt, Laura Santos, plus";
+        const segments = [
+          { text: "Distribution :", style: "#5F5F5F" },
+          { text: " " + distributionDynamic, style: "#B5B5B5" },
+        ];
+        // Aligner le bas du bloc sur la ligne recY (pour rester au même niveau que le texte "Recommandé...")
+        drawWrappedMultiColorText(
+          context,
+          segments,
+          distributionX,
+          recY,
+          distributionWidth,
+          distributionLineHeight
+        );
+
         // Rectangle et textes associés
         if (
           rectangleSvgImage.complete &&
@@ -330,7 +421,7 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
             );
             context.save();
             context.font =
-              "600 " + desiredTop10Height * 0.8 + "px 'Inter', sans-serif";
+              "600 " + desiredTop10Height * 0.72 + "px 'Inter', sans-serif";
             context.fillStyle = "white";
             context.textBaseline = "middle";
             const marginBetweenTop10 = 8 * scale,
@@ -343,8 +434,8 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
             const storyMarginTop = 30 * scale,
               storyX = recX,
               storyY = top10Y + desiredTop10Height + storyMarginTop,
-              storyBoxWidth = pageW - recMargin * 7,
-              storyFontSize = 11.4 * scale,
+              storyBoxWidth = pageW - recMargin * 8.2,
+              storyFontSize = 10 * scale,
               storyLineHeight = storyFontSize * 1.2,
               storyText =
                 document.getElementById("story-text").value ||
@@ -401,6 +492,9 @@ Suivez le parcours de Juliann, un enfant énergique et têtu de trois ans et dem
         .addEventListener("input", draw);
       document
         .getElementById("rectangle-right-text")
+        .addEventListener("input", draw);
+      document
+        .getElementById("distribution-text")
         .addEventListener("input", draw);
       document.getElementById("story-text").addEventListener("input", draw);
       document.getElementById("photo").addEventListener("change", (e) => {
