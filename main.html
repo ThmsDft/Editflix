@@ -577,7 +577,7 @@
         drawContent(tempCtx, 0, 0, 1);
         const link = document.createElement("a");
         link.href = tempCanvas.toDataURL("image/png");
-        link.download = "document_a4.png";
+        link.download = seriesTitle ? `${seriesTitle}.png` : "nextflix.png";
         link.click();
       });
     </script>
