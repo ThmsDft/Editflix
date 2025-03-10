@@ -43,6 +43,39 @@
       "distribution-text": "Jean Martin, Pierre Dubois",
       "genres-text": "action, thriller, policier",
       "photo": "img/prison.jpg"
+    },
+    {
+      "serieTitle": "MONEY",
+      "recommendation": "90",
+      "year": "2025",
+      "rectangle-number": "20",
+      "rectangle-right-text": "Crime, Fortune",
+      "story-text": "Petit voyou des quartiers, Alex découvre un moyen rapide de s'enrichir et gravit les échelons du monde criminel. Mais sa réussite attire jalousie et danger.",
+      "distribution-text": "Yanis Belaid, Sophie Martel, Karim Duroy",
+      "genres-text": "crime, drame, ascension",
+      "photo": "img/money.jpg"
+    },
+    {
+      "serieTitle": "BIKER",
+      "recommendation": "87",
+      "year": "2024",
+      "rectangle-number": "14",
+      "rectangle-right-text": "Vitesse, Adrénaline",
+      "story-text": "Nathan, un motard talentueux, se retrouve plongé dans l'univers des courses urbaines illégales. Entre gloire, dangers et règlements de compte, il devra tout risquer.",
+      "distribution-text": "Léo Garnier, Clara Vasseur, Hugo Morel",
+      "genres-text": "action, thriller, sport mécanique",
+      "photo": "img/biker.jpg"
+    },
+    {
+      "serieTitle": "BOXING",
+      "recommendation": "92",
+      "year": "2025",
+      "rectangle-number": "17",
+      "rectangle-right-text": "Détermination, Combat",
+      "story-text": "Léa, une boxeuse passionnée, lutte pour se faire un nom dans le monde impitoyable de la boxe tout en affrontant ses propres démons personnels.",
+      "distribution-text": "Manon Leroy, Stéphane Dubreuil, Aïssa Kamara",
+      "genres-text": "drame, sport, dépassement de soi",
+      "photo": "img/boxing.jpg"
     }
   ]
 }
