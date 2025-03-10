@@ -42,6 +42,8 @@ const elements = {
   photoInput: document.getElementById("photo"),
   customText: document.getElementById("custom-text"),
   exportButton: document.getElementById("export-png"),
+  closeControls: document.getElementById("close"),
+  controls: document.getElementById("controls"),
 };
 
 /* ----- Canvas ----- */
@@ -522,6 +524,12 @@ canvas.addEventListener(
 canvas.addEventListener("touchend", (e) => {
   if (e.touches.length < 2) isPinching = false;
   if (e.touches.length < 1) isPanning = false;
+});
+
+/* ----- Close Controls button ----- */
+elements.closeControls.addEventListener("click", () => {
+  console.log("close");
+  elements.controls.classList.add("hidden");
 });
 
 /* ----- Export PNG ----- */
