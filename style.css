@@ -1,0 +1,182 @@
+/* Style global */
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  height: 100vh;
+  background-color: #141414;
+  font-family: "Inter", sans-serif;
+  overflow: hidden;
+}
+
+/* Panneau de contrôles */
+#controls {
+  width: 300px;
+  padding: 20px;
+  background-color: #141414;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-right: 1px solid #333;
+}
+
+/* Labels */
+#controls label {
+  font-size: 13px;
+  color: #bbb;
+}
+
+/* Style commun aux inputs, textarea et bouton */
+#controls input,
+#controls textarea {
+  margin-bottom: 10px;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #222;
+  color: #fff;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+  resize: none;
+}
+
+/* Effet focus */
+#controls input:focus,
+#controls textarea:focus {
+  outline: none;
+  background-color: #444444;
+}
+
+/* Style du bouton */
+#controls button {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #e50914;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#controls button:hover {
+  background-color: #b20710;
+}
+
+/* Styles pour le bouton personnalisé du fichier */
+.custom-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.custom-file #custom-button {
+  margin-bottom: 10px;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #e50914;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  min-width: 130px;
+}
+.custom-file #custom-button:hover {
+  background-color: #b20710;
+}
+.custom-file #custom-text {
+  color: #fff;
+  font-size: 12px;
+}
+
+/* Zone du canvas */
+#canvas-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background-color: #000;
+}
+
+canvas {
+  background: #000;
+  width: 100%;
+  height: 100%;
+}
+
+/* Pour améliorer l'expérience utilisateur sur textarea */
+textarea {
+  min-height: 100px;
+}
+
+/* Personnalisation de la scrollbar du textarea */
+/* Pour Firefox */
+textarea {
+  scrollbar-width: thin;
+  scrollbar-color: #e50914 #222; /* couleur de la "thumb" et de la piste */
+}
+
+/* Pour Chrome, Edge, Safari */
+textarea::-webkit-scrollbar {
+  width: 8px;
+}
+
+textarea::-webkit-scrollbar-track {
+  background: #222;
+  border-radius: 10px;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  background-color: #e50914;
+  border-radius: 10px;
+  border: px solid #222;
+}
+
+/* Personnalisation (ou suppression) des flèches dans les input number */
+/* Pour Firefox, on retire les flèches natives */
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Pour Chrome, Edge, Safari : on masque les flèches natives */
+/* Si tu souhaites les personnaliser complètement, il faudra créer des boutons custom avec JS */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Panneau de contrôles */
+#controls {
+  width: 300px;
+  padding: 20px;
+  background-color: #141414;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-right: 1px solid #333;
+  overflow-y: auto; /* Permet le défilement vertical */
+}
+
+/* Personnalisation de la scrollbar pour #controls */
+/* Pour Chrome, Edge, Safari */
+#controls::-webkit-scrollbar {
+  width: 8px;
+}
+
+#controls::-webkit-scrollbar-track {
+  background: #222;
+  border-radius: 10px;
+}
+
+#controls::-webkit-scrollbar-thumb {
+  background-color: #e50914;
+  border-radius: 10px;
+  border: 1px solid #222;
+}
+
+/* Pour Firefox */
+#controls {
+  scrollbar-width: thin;
+  scrollbar-color: #e50914 #222;
+}
