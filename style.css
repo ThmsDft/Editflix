@@ -14,6 +14,20 @@ body {
   position: relative;
 }
 
+button#open {
+  z-index: 1000;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  padding: 5px 10px;
+  border: none;
+  background-color: #e50914;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
 /* Zone du canvas */
 #canvas-container {
   flex: 1;
@@ -48,7 +62,7 @@ canvas {
   height: 100vh;
 }
 
-#controls.hidden {
+#controls.hidden, .hidden {
   display: none;
 }
 
@@ -117,7 +131,7 @@ canvas {
 }
 
 /* Bouton standard */
-#controls button {
+ button {
   padding: 10px;
   border: none;
   border-radius: 5px;
@@ -130,7 +144,8 @@ canvas {
 }
 
 #controls button:hover,
-#controls button#close:hover {
+#controls button#close:hover,
+button#open:hover {
   background-color: #b20710;
 }
 

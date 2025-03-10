@@ -43,6 +43,7 @@ const elements = {
   customText: document.getElementById("custom-text"),
   exportButton: document.getElementById("export-png"),
   closeControls: document.getElementById("close"),
+  openControls: document.getElementById("open"),
   controls: document.getElementById("controls"),
 };
 
@@ -526,10 +527,17 @@ canvas.addEventListener("touchend", (e) => {
   if (e.touches.length < 1) isPanning = false;
 });
 
-/* ----- Close Controls button ----- */
+/* ----- Open & close Controls ----- */
 elements.closeControls.addEventListener("click", () => {
   console.log("close");
   elements.controls.classList.add("hidden");
+  elements.openControls.classList.remove("hidden");
+});
+
+elements.openControls.addEventListener("click", () => {
+  console.log("open");
+  elements.controls.classList.remove("hidden");
+  elements.openControls.classList.add("hidden");
 });
 
 /* ----- Export PNG ----- */
