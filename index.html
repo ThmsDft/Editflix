@@ -8,17 +8,16 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;800;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div id="controls">
-      <img src="svg/Nextflix.svg" alt="Nextflix">
-      <H1>Ta prochaine série, c’est toi</H1>
+      <img src="svg/Nextflix.svg" alt="Nextflix" />
+      <h1>Ta prochaine série, c’est toi</h1>
       <label for="serie-title">Titre de la série</label>
       <input type="text" id="serie-title" value="" />
 
       <label>Image de fond</label>
-      <!-- Bouton personnalisé pour l'input file -->
       <div class="custom-file">
         <input type="file" id="photo" accept="image/*" style="display: none" />
         <button type="button" id="custom-button">Choisir un fichier</button>
@@ -43,8 +42,7 @@
       />
 
       <label for="story-text">Synopsis</label>
-      <textarea id="story-text" rows="4" placeholder="Synopsis">
-      </textarea>
+      <textarea id="story-text" rows="4" placeholder="Synopsis"></textarea>
 
       <label for="distribution-text">Distribution</label>
       <input
@@ -67,39 +65,59 @@
     <div id="canvas-container">
       <canvas id="editor"></canvas>
     </div>
+
     <script>
-      // Dimensions de la feuille A4 pour l'affichage interactif
-      const baseWidth = 600,
-        baseHeight = 849;
-      // Pour l'interactivité, position et échelle de la page dans le canvas
-      let pageX = 0,
-        pageY = 0,
-        pageScale = 1;
-      // Contenu dynamique
-      let seriesTitle = "",
-        photo = null;
+      /* ----- Configuration et variables globales ----- */
+      const config = {
+        baseWidth: 600,
+        baseHeight: 849,
+        scale: 1,
+        pageX: 0,
+        pageY: 0,
+      };
 
-      // Chargement des images SVG
-      let netflixSvgImage = new Image();
-      netflixSvgImage.src = "./svg/Netflix.svg";
-      netflixSvgImage.onload = draw;
+      let seriesTitle = "";
+      let photo = null;
+      let isDraggingPage = false,
+        dragStartX,
+        dragStartY;
 
-      let hdSvgImage = new Image();
-      hdSvgImage.src = "./svg/HD.svg";
-      hdSvgImage.onload = draw;
+      /* ----- Préchargement des images SVG ----- */
+      const images = {
+        netflix: new Image(),
+        hd: new Image(),
+        rectangle: new Image(),
+        top10: new Image(),
+      };
+      images.netflix.src = "./svg/Netflix.svg";
+      images.hd.src = "./svg/HD.svg";
+      images.rectangle.src = "./svg/Rectangle.svg";
+      images.top10.src = "./svg/Top10.svg";
+      Object.values(images).forEach((img) => {
+        img.onload = draw;
+      });
 
-      let rectangleSvgImage = new Image();
-      rectangleSvgImage.src = "./svg/Rectangle.svg";
-      rectangleSvgImage.onload = draw;
+      /* ----- Récupération des éléments du DOM ----- */
+      const elements = {
+        serieTitle: document.getElementById("serie-title"),
+        recommendation: document.getElementById("recommendation"),
+        year: document.getElementById("year"),
+        rectangleNumber: document.getElementById("rectangle-number"),
+        rectangleRightText: document.getElementById("rectangle-right-text"),
+        storyText: document.getElementById("story-text"),
+        distributionText: document.getElementById("distribution-text"),
+        genresText: document.getElementById("genres-text"),
+        customButton: document.getElementById("custom-button"),
+        photoInput: document.getElementById("photo"),
+        customText: document.getElementById("custom-text"),
+        exportButton: document.getElementById("export-png"),
+      };
 
-      let top10SvgImage = new Image();
-      top10SvgImage.src = "./svg/Top10.svg";
-      top10SvgImage.onload = draw;
-
+      /* ----- Canvas ----- */
       const canvas = document.getElementById("editor");
       const ctx = canvas.getContext("2d");
 
-      // Fonction utilitaire pour envelopper du texte (monochrome)
+      /* ----- Fonctions utilitaires ----- */
       function wrapText(context, text, x, y, maxWidth, lineHeight) {
         const words = text.split(" ");
         let line = "";
@@ -116,13 +134,10 @@
         context.fillText(line, x, y);
       }
 
-      // Fonctions de découpage et dessin du texte multi-couleur en alignement TOP,
-      // ajoutant un espace entre les mots sur la même ligne, mais sans espace en début de ligne.
       function getWrappedLines(context, segments, maxWidth) {
         let words = [];
         segments.forEach((seg) => {
-          let segWords = seg.text.split(" ");
-          segWords.forEach((w) => {
+          seg.text.split(" ").forEach((w) => {
             words.push({ text: w, style: seg.style });
           });
         });
@@ -132,25 +147,23 @@
         const spaceWidth = context.measureText(" ").width;
         words.forEach((word) => {
           const wordWidth = context.measureText(word.text).width;
-          const additionalSpace = currentLine.length > 0 ? spaceWidth : 0;
+          const additionalSpace = currentLine.length ? spaceWidth : 0;
           if (
             currentLineWidth + additionalSpace + wordWidth > maxWidth &&
-            currentLine.length > 0
+            currentLine.length
           ) {
             lines.push(currentLine);
             currentLine = [];
             currentLineWidth = 0;
           }
-          if (currentLine.length > 0) {
+          if (currentLine.length) {
             currentLine.push({ text: " ", style: word.style });
             currentLineWidth += spaceWidth;
           }
           currentLine.push(word);
           currentLineWidth += wordWidth;
         });
-        if (currentLine.length > 0) {
-          lines.push(currentLine);
-        }
+        if (currentLine.length) lines.push(currentLine);
         return lines;
       }
 
@@ -166,7 +179,7 @@
         const lines = getWrappedLines(context, segments, maxWidth);
         lines.forEach((line, i) => {
           let currentX = x;
-          let lineY = topY + i * lineHeight;
+          const lineY = topY + i * lineHeight;
           line.forEach((word) => {
             context.fillStyle = word.style;
             context.fillText(word.text, currentX, lineY);
@@ -175,15 +188,16 @@
         });
       }
 
-      // Fonction de dessin principale
+      /* ----- Fonction de dessin principale ----- */
       function drawContent(context, pX, pY, scale) {
-        const pageW = baseWidth * scale,
-          pageH = baseHeight * scale;
-        // Fond de la page (zone A4)
+        const pageW = config.baseWidth * scale,
+          pageH = config.baseHeight * scale;
+
+        // Fond noir
         context.fillStyle = "black";
         context.fillRect(pX, pY, pageW, pageH);
 
-        // Image de fond et dégradé noir (80% de la hauteur)
+        // Image de fond et dégradé
         if (photo) {
           const targetWidth = pageW,
             targetHeight = pageH * 0.8,
@@ -218,7 +232,6 @@
 
         // Titre de la série
         context.save();
-        context.beginPath();
         context.rect(pX, pY, pageW, pageH);
         context.clip();
         context.fillStyle = "white";
@@ -229,20 +242,15 @@
         context.restore();
 
         // SVG Netflix
-        if (
-          netflixSvgImage.complete &&
-          netflixSvgImage.naturalWidth &&
-          netflixSvgImage.naturalHeight
-        ) {
+        if (images.netflix.complete && images.netflix.naturalWidth) {
           const marginSvg = 35 * scale,
             desiredSvgWidth = 200 * scale,
-            ratio =
-              netflixSvgImage.naturalWidth / netflixSvgImage.naturalHeight,
+            ratio = images.netflix.naturalWidth / images.netflix.naturalHeight,
             desiredSvgHeight = desiredSvgWidth / ratio,
             svgX = pX + marginSvg,
             svgY = pY + pageH - desiredSvgHeight - marginSvg * 7.2;
           context.drawImage(
-            netflixSvgImage,
+            images.netflix,
             svgX,
             svgY,
             desiredSvgWidth,
@@ -258,10 +266,9 @@
           recX = pX + recMargin,
           recY = pY + pageH - recMargin * 5.2,
           recText1 = "Recommandé à ",
-          recPercentage =
-            document.getElementById("recommendation").value || "98",
+          recPercentage = elements.recommendation.value || "98",
           recText2 = " %  ",
-          recYear = document.getElementById("year").value || "2024";
+          recYear = elements.year.value || "2024";
         context.fillStyle = "#45D068";
         context.fillText(recText1, recX, recY);
         const width1 = context.measureText(recText1).width;
@@ -274,12 +281,8 @@
         const widthRecYear = context.measureText(recYear).width;
         context.restore();
 
-        // SVG HD avec marge ajustée (10 * scale)
-        if (
-          hdSvgImage.complete &&
-          hdSvgImage.naturalWidth &&
-          hdSvgImage.naturalHeight
-        ) {
+        // SVG HD
+        if (images.hd.complete && images.hd.naturalWidth) {
           const iconAdditionalMargin = 5 * scale,
             iconX =
               recX +
@@ -290,25 +293,22 @@
               iconAdditionalMargin,
             iconWidth = 16.3 * scale * 1.3,
             iconHeight =
-              iconWidth * (hdSvgImage.naturalHeight / hdSvgImage.naturalWidth),
+              iconWidth * (images.hd.naturalHeight / images.hd.naturalWidth),
             iconY = recY - iconHeight * 1.05;
-          context.drawImage(hdSvgImage, iconX, iconY, iconWidth, iconHeight);
+          context.drawImage(images.hd, iconX, iconY, iconWidth, iconHeight);
         }
 
-        // Bloc de texte "Distribution : ..." en alignement TOP
-        const distributionWidth = baseWidth * 0.28 * scale,
+        // Bloc Distribution
+        const distributionWidth = config.baseWidth * 0.28 * scale,
           distributionX = pX + pageW - distributionWidth - recMargin,
           distributionFontSize = 8.8 * scale,
-          distributionLineHeight = distributionFontSize * 1.2;
-        const distributionDynamic =
-          document.getElementById("distribution-text").value ||
-          "";
-        const distributionSegments = [
-          { text: "Distribution :", style: "#5F5F5F" },
-          { text: " " + distributionDynamic, style: "#B5B5B5" },
-        ];
-        // Point de départ fixe en haut pour le bloc Distribution
-        const distributionTopY = recY * 0.98;
+          distributionLineHeight = distributionFontSize * 1.2,
+          distributionDynamic = elements.distributionText.value || "",
+          distributionSegments = [
+            { text: "Distribution :", style: "#5F5F5F" },
+            { text: " " + distributionDynamic, style: "#B5B5B5" },
+          ],
+          distributionTopY = recY - 14 * scale;
         drawWrappedMultiColorTextTop(
           context,
           distributionSegments,
@@ -317,8 +317,6 @@
           distributionWidth,
           distributionLineHeight
         );
-
-        // Calcul de la hauteur du bloc Distribution
         const distributionLines = getWrappedLines(
           context,
           distributionSegments,
@@ -327,17 +325,15 @@
         const distributionBlockHeight =
           distributionLines.length * distributionLineHeight;
 
-        // Bloc de texte "Genres : ..." en alignement TOP, placé sous Distribution
-        const genresDynamic =
-          document.getElementById("genres-text").value ||
-          "";
-        const genresSegments = [
-          { text: "Genres :", style: "#5F5F5F" },
-          { text: " " + genresDynamic, style: "#B5B5B5" },
-        ];
-        const genresMargin = 13 * scale;
-        const genresTopY =
-          distributionTopY + distributionBlockHeight + genresMargin;
+        // Bloc Genres
+        const genresDynamic = elements.genresText.value || "",
+          genresSegments = [
+            { text: "Genres :", style: "#5F5F5F" },
+            { text: " " + genresDynamic, style: "#B5B5B5" },
+          ],
+          genresMargin = 13 * scale,
+          genresTopY =
+            distributionTopY + distributionBlockHeight + genresMargin;
         drawWrappedMultiColorTextTop(
           context,
           genresSegments,
@@ -348,28 +344,22 @@
         );
 
         // Rectangle et textes associés
-        if (
-          rectangleSvgImage.complete &&
-          rectangleSvgImage.naturalWidth &&
-          rectangleSvgImage.naturalHeight
-        ) {
+        if (images.rectangle.complete && images.rectangle.naturalWidth) {
           const rectMarginTop = 5 * scale,
             desiredRectWidth = 100 * scale * 0.28,
             desiredRectHeight =
               desiredRectWidth *
-              (rectangleSvgImage.naturalHeight /
-                rectangleSvgImage.naturalWidth),
+              (images.rectangle.naturalHeight / images.rectangle.naturalWidth),
             rectX = recX,
             rectY = recY + rectMarginTop;
           context.drawImage(
-            rectangleSvgImage,
+            images.rectangle,
             rectX,
             rectY,
             desiredRectWidth,
             desiredRectHeight
           );
-          const rectValue =
-              document.getElementById("rectangle-number").value || "16",
+          const rectValue = elements.rectangleNumber.value || "16",
             rectText = rectValue + "+";
           context.save();
           context.font =
@@ -384,9 +374,7 @@
           );
           context.restore();
 
-          const rightText =
-            document.getElementById("rectangle-right-text").value ||
-            "";
+          const rightText = elements.rectangleRightText.value || "";
           context.save();
           context.font =
             "600 " + desiredRectHeight * 0.8 + "px 'Inter', sans-serif";
@@ -402,20 +390,16 @@
           context.restore();
 
           // Top10 SVG et texte associé
-          if (
-            top10SvgImage.complete &&
-            top10SvgImage.naturalWidth &&
-            top10SvgImage.naturalHeight
-          ) {
+          if (images.top10.complete && images.top10.naturalWidth) {
             const top10MarginTop = 10 * scale,
               top10X = recX,
               top10Y = rectY + desiredRectHeight + top10MarginTop,
               desiredTop10Width = 18 * scale,
               desiredTop10Height =
                 desiredTop10Width *
-                (top10SvgImage.naturalHeight / top10SvgImage.naturalWidth);
+                (images.top10.naturalHeight / images.top10.naturalWidth);
             context.drawImage(
-              top10SvgImage,
+              images.top10,
               top10X,
               top10Y,
               desiredTop10Width,
@@ -432,14 +416,14 @@
             context.fillText("N° 1 des séries TV aujourd’hui", textX, textY);
             context.restore();
 
-            // Bloc de texte d'histoire
+            // Bloc d'histoire
             const storyMarginTop = 30 * scale,
               storyX = recX,
               storyY = top10Y + desiredTop10Height + storyMarginTop,
               storyBoxWidth = pageW - recMargin * 8.2,
               storyFontSize = 10 * scale,
               storyLineHeight = storyFontSize * 1.2,
-              storyText = document.getElementById("story-text").value || "";
+              storyText = elements.storyText.value || "";
             context.save();
             context.font = storyFontSize + "px 'Inter', sans-serif";
             context.fillStyle = "white";
@@ -456,22 +440,21 @@
         }
       }
 
-      // Fonction de dessin interactif
+      /* ----- Fonction de dessin et redimensionnement ----- */
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "#999";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        drawContent(ctx, pageX, pageY, pageScale);
+        drawContent(ctx, config.pageX, config.pageY, config.scale);
       }
 
-      // Redimensionnement du canvas interactif
       function resizeCanvas() {
         const container = document.getElementById("canvas-container");
         canvas.width = container.clientWidth;
         canvas.height = container.clientHeight;
-        if (pageX === 0 && pageY === 0) {
-          pageX = (canvas.width - baseWidth * pageScale) / 2;
-          pageY = (canvas.height - baseHeight * pageScale) / 2;
+        if (config.pageX === 0 && config.pageY === 0) {
+          config.pageX = (canvas.width - config.baseWidth * config.scale) / 2;
+          config.pageY = (canvas.height - config.baseHeight * config.scale) / 2;
         }
         draw();
       }
@@ -479,70 +462,65 @@
       window.addEventListener("resize", resizeCanvas);
       resizeCanvas();
 
-      // Événements pour la mise à jour dynamique
-      document.getElementById("serie-title").addEventListener("input", (e) => {
-        seriesTitle = e.target.value || "";
-        draw();
-      });
-      document.getElementById("recommendation").addEventListener("input", draw);
-      document.getElementById("year").addEventListener("input", draw);
-      document
-        .getElementById("rectangle-number")
-        .addEventListener("input", draw);
-      document
-        .getElementById("rectangle-right-text")
-        .addEventListener("input", draw);
-      document
-        .getElementById("distribution-text")
-        .addEventListener("input", draw);
-      document.getElementById("genres-text").addEventListener("input", draw);
-      document.getElementById("story-text").addEventListener("input", draw);
-
-      // Bouton personnalisé : déclencher l'input file
-      document.getElementById("custom-button").addEventListener("click", () => {
-        document.getElementById("photo").click();
+      /* ----- Événements sur les inputs ----- */
+      [
+        "serieTitle",
+        "recommendation",
+        "year",
+        "rectangleNumber",
+        "rectangleRightText",
+        "distributionText",
+        "genresText",
+        "storyText",
+      ].forEach((id) => {
+        elements[id].addEventListener("input", () => {
+          if (id === "serieTitle")
+            seriesTitle = elements.serieTitle.value || "";
+          draw();
+        });
       });
 
-      // Mise à jour de l'affichage du nom du fichier choisi
-      document.getElementById("photo").addEventListener("change", (e) => {
+      /* ----- Gestion du bouton fichier personnalisé ----- */
+      elements.customButton.addEventListener("click", () =>
+        elements.photoInput.click()
+      );
+      elements.photoInput.addEventListener("change", (e) => {
         const file = e.target.files[0];
-        const customText = document.getElementById("custom-text");
         if (file) {
-          customText.textContent = file.name;
+          elements.customText.textContent = file.name;
           photo = new Image();
           photo.onload = draw;
           photo.src = URL.createObjectURL(file);
         } else {
-          customText.textContent = "Aucun fichier sélectionné";
+          elements.customText.textContent = "Aucun fichier sélectionné";
         }
       });
 
-      // Permettre le pan même en dehors du A4 et afficher le curseur en main
-      let isDraggingPage = false,
-        dragStartX,
-        dragStartY;
+      /* ----- Gestion du pan et zoom sur le canvas ----- */
       canvas.addEventListener("mousedown", (e) => {
         const rect = canvas.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
         isDraggingPage = true;
-        dragStartX = mouseX - pageX;
-        dragStartY = mouseY - pageY;
+        dragStartX = mouseX - config.pageX;
+        dragStartY = mouseY - config.pageY;
         canvas.style.cursor = "grabbing";
       });
+
       canvas.addEventListener("mousemove", (e) => {
         const rect = canvas.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
         if (isDraggingPage) {
-          pageX = mouseX - dragStartX;
-          pageY = mouseY - dragStartY;
+          config.pageX = mouseX - dragStartX;
+          config.pageY = mouseY - dragStartY;
           draw();
           canvas.style.cursor = "grabbing";
         } else {
           canvas.style.cursor = "grab";
         }
       });
+
       canvas.addEventListener("mouseup", () => {
         isDraggingPage = false;
         canvas.style.cursor = "grab";
@@ -552,28 +530,27 @@
         canvas.style.cursor = "grab";
       });
 
-      // Permettre le zoom même si le curseur est en dehors du A4
       canvas.addEventListener("wheel", (e) => {
         e.preventDefault();
         const rect = canvas.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
         const zoomAmount = e.deltaY * -0.001;
-        const newScale = Math.min(Math.max(pageScale + zoomAmount, 0.1), 3);
-        const relX = mouseX - pageX;
-        const relY = mouseY - pageY;
-        pageX = mouseX - (relX * newScale) / pageScale;
-        pageY = mouseY - (relY * newScale) / pageScale;
-        pageScale = newScale;
+        const newScale = Math.min(Math.max(config.scale + zoomAmount, 0.1), 3);
+        const relX = mouseX - config.pageX;
+        const relY = mouseY - config.pageY;
+        config.pageX = mouseX - (relX * newScale) / config.scale;
+        config.pageY = mouseY - (relY * newScale) / config.scale;
+        config.scale = newScale;
         draw();
       });
 
-      // Export PNG – création d'un canvas temporaire en haute résolution
-      document.getElementById("export-png").addEventListener("click", () => {
+      /* ----- Export PNG ----- */
+      elements.exportButton.addEventListener("click", () => {
         const exportMultiplier = 3;
         const tempCanvas = document.createElement("canvas");
-        tempCanvas.width = baseWidth * exportMultiplier;
-        tempCanvas.height = baseHeight * exportMultiplier;
+        tempCanvas.width = config.baseWidth * exportMultiplier;
+        tempCanvas.height = config.baseHeight * exportMultiplier;
         const tempCtx = tempCanvas.getContext("2d");
         tempCtx.scale(exportMultiplier, exportMultiplier);
         drawContent(tempCtx, 0, 0, 1);
@@ -582,9 +559,8 @@
         link.download = seriesTitle ? `${seriesTitle}.png` : "nextflix.png";
         link.click();
       });
-    </script>
 
-    <script>
+      /* ----- Chargement des exemples depuis JSON ----- */
       window.addEventListener("load", () => {
         fetch("exemples.json")
           .then((response) => response.json())
@@ -593,30 +569,21 @@
             const exempleChoisi =
               exemples[Math.floor(Math.random() * exemples.length)];
 
-            // Mise à jour des inputs
-            document.getElementById("serie-title").value =
-              exempleChoisi.serieTitle;
-            seriesTitle = exempleChoisi.serieTitle; // Mise à jour de la variable globale
-            document.getElementById("serie-title").value =
-              exempleChoisi.serieTitle;
-            document.getElementById("recommendation").value =
-              exempleChoisi.recommendation;
-            document.getElementById("year").value = exempleChoisi.year;
-            document.getElementById("rectangle-number").value =
-              exempleChoisi["rectangle-number"];
-            document.getElementById("rectangle-right-text").value =
+            elements.serieTitle.value = exempleChoisi.serieTitle;
+            seriesTitle = exempleChoisi.serieTitle;
+            elements.recommendation.value = exempleChoisi.recommendation;
+            elements.year.value = exempleChoisi.year;
+            elements.rectangleNumber.value = exempleChoisi["rectangle-number"];
+            elements.rectangleRightText.value =
               exempleChoisi["rectangle-right-text"];
-            document.getElementById("story-text").value =
-              exempleChoisi["story-text"];
-            document.getElementById("distribution-text").value =
+            elements.storyText.value = exempleChoisi["story-text"];
+            elements.distributionText.value =
               exempleChoisi["distribution-text"];
-            document.getElementById("genres-text").value =
-              exempleChoisi["genres-text"];
+            elements.genresText.value = exempleChoisi["genres-text"];
 
-            // Si une image de fond est définie dans le JSON, on la charge
             if (exempleChoisi.photo) {
               photo = new Image();
-              photo.onload = draw; // redraw une fois l'image chargée
+              photo.onload = draw;
               photo.src = exempleChoisi.photo;
             } else {
               photo = null;
