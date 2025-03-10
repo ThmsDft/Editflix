@@ -60,6 +60,7 @@ canvas {
   scrollbar-width: thin;
   scrollbar-color: #e50914 #222;
   height: 100vh;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
 }
 
 #controls.hidden, .hidden {
