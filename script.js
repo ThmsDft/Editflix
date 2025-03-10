@@ -462,6 +462,68 @@ canvas.addEventListener("wheel", (e) => {
   draw();
 });
 
+/* --------- Gestion des gestes tactiles (pan & pinch zoom) --------- */
+canvas.addEventListener(
+  "touchstart",
+  (e) => {
+    e.preventDefault();
+    if (e.touches.length === 2) {
+      isPinching = true;
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      lastTouchDistance = Math.sqrt(dx * dx + dy * dy);
+    } else if (e.touches.length === 1) {
+      isPanning = true;
+      lastTouchPosition = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+    }
+  },
+  { passive: false }
+);
+canvas.addEventListener(
+  "touchmove",
+  (e) => {
+    e.preventDefault();
+    if (isPinching && e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const newDistance = Math.sqrt(dx * dx + dy * dy);
+      const zoomFactor = newDistance / lastTouchDistance;
+      lastTouchDistance = newDistance;
+      const rect = canvas.getBoundingClientRect();
+      const centerX =
+        (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+      const centerY =
+        (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+      const relX = centerX - config.pageX;
+      const relY = centerY - config.pageY;
+      const newScale = Math.min(Math.max(config.scale * zoomFactor, 0.1), 3);
+      config.pageX = centerX - (relX * newScale) / config.scale;
+      config.pageY = centerY - (relY * newScale) / config.scale;
+      config.scale = newScale;
+      draw();
+    } else if (isPanning && e.touches.length === 1) {
+      const currentPos = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+      const deltaX = currentPos.x - lastTouchPosition.x;
+      const deltaY = currentPos.y - lastTouchPosition.y;
+      config.pageX += deltaX;
+      config.pageY += deltaY;
+      lastTouchPosition = currentPos;
+      draw();
+    }
+  },
+  { passive: false }
+);
+canvas.addEventListener("touchend", (e) => {
+  if (e.touches.length < 2) isPinching = false;
+  if (e.touches.length < 1) isPanning = false;
+});
+
 /* ----- Export PNG ----- */
 elements.exportButton.addEventListener("click", () => {
   const exportMultiplier = 3;
