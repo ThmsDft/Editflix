@@ -9,7 +9,7 @@
       "story-text": "Un jeune entrepreneur ambitieux hérite du contrôle d'une grande entreprise et doit naviguer dans un monde impitoyable de trahisons et rivalités pour asseoir son pouvoir.",
       "distribution-text": "Maxime Durand, Camille Lefèvre, Julien Morel",
       "genres-text": "drame, pouvoir, entreprise",
-      "photo": "img/power.png"
+      "photo": "img/power.webp"
     },
     {
       "serieTitle": "ENTRE NOUS",
@@ -20,7 +20,7 @@
       "story-text": "Dans une rencontre inattendue, un homme et une femme se retrouvent liés par un amour sincère, défiant les obstacles du destin et les conventions sociales.",
       "distribution-text": "Alice Dupont, Marc Lemaire, Catherine Rousseau",
       "genres-text": "romance, drame",
-      "photo": "img/love.jpg"
+      "photo": "img/love.webp"
     },
     {
       "serieTitle": "ICE",
@@ -31,7 +31,7 @@
       "story-text": "Sur les chemins glacés d'une montagne majestueuse, un homme marche seul, affrontant le froid extrême et la solitude dans une quête de liberté.",
       "distribution-text": "Lucas Moreau, Jeanne Petit",
       "genres-text": "aventure, thriller",
-      "photo": "img/ice.jpg"
+      "photo": "img/ice.webp"
     },
     {
       "serieTitle": "PRISON",
@@ -42,7 +42,7 @@
       "story-text": "Dans une ambiance sombre et oppressante, un policier escortant un détenu énigmatique se retrouve au cœur d'une intrigue complexe dans une prison impitoyable.",
       "distribution-text": "Jean Martin, Pierre Dubois",
       "genres-text": "action, thriller, policier",
-      "photo": "img/prison.jpg"
+      "photo": "img/prison.webp"
     },
     {
       "serieTitle": "MONEY",
@@ -53,7 +53,7 @@
       "story-text": "Petit voyou des quartiers, Alex découvre un moyen rapide de s'enrichir et gravit les échelons du monde criminel. Mais sa réussite attire jalousie et danger.",
       "distribution-text": "Yanis Belaid, Sophie Martel, Karim Duroy",
       "genres-text": "crime, drame, ascension",
-      "photo": "img/money.jpg"
+      "photo": "img/money.webp"
     },
     {
       "serieTitle": "BIKER",
@@ -64,7 +64,7 @@
       "story-text": "Nathan, un motard talentueux, se retrouve plongé dans l'univers des courses urbaines illégales. Entre gloire, dangers et règlements de compte, il devra tout risquer.",
       "distribution-text": "Léo Garnier, Clara Vasseur, Hugo Morel",
       "genres-text": "action, thriller, sport mécanique",
-      "photo": "img/biker.jpg"
+      "photo": "img/biker.webp"
     },
     {
       "serieTitle": "BOXING",
@@ -75,7 +75,7 @@
       "story-text": "Léa, une boxeuse passionnée, lutte pour se faire un nom dans le monde impitoyable de la boxe tout en affrontant ses propres démons personnels.",
       "distribution-text": "Manon Leroy, Stéphane Dubreuil, Aïssa Kamara",
       "genres-text": "drame, sport, dépassement de soi",
-      "photo": "img/boxing.jpg"
+      "photo": "img/boxing.webp"
     }
   ]
 }
