@@ -7,6 +7,7 @@ body {
   background-color: #141414;
   font-family: "Inter", sans-serif;
   overflow: hidden;
+  position: relative;
 }
 
 /* Zone du canvas */
@@ -25,7 +26,12 @@ canvas {
 
 /* Panneau de contrôles */
 #controls {
-  width: 300px;
+  box-sizing: border-box;
+  z-index: 999;
+  top: 0;
+  left: 0;
+  position: fixed;
+  width: 340px;
   padding: 20px;
   background-color: #141414;
   border-right: 1px solid #333;
@@ -36,6 +42,7 @@ canvas {
   overflow-x: hidden;
   scrollbar-width: thin;
   scrollbar-color: #e50914 #222;
+  height: 100vh;
 }
 
 #controls img {
