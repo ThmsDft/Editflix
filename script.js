@@ -46,9 +46,10 @@ const elements = {
   photoInput: document.getElementById("photo"),
   customText: document.getElementById("custom-text"),
   exportButton: document.getElementById("export-png"),
+  controls: document.getElementById("controls"),
   closeControls: document.getElementById("close"),
   openControls: document.getElementById("open"),
-  controls: document.getElementById("controls"),
+  resetButton: document.getElementById("reset"), // Bouton pour recentrer et réinitialiser la taille
 };
 
 /* ----- Canvas ----- */
@@ -395,6 +396,22 @@ function resizeCanvas() {
   draw();
 }
 
+/* ----- Fonction de recentrage et réinitialisation de la taille ----- */
+function recenter() {
+  const margin = 20;
+  const availableWidth = canvas.width - 2 * margin;
+  const availableHeight = canvas.height - 2 * margin;
+  // Réinitialiser le scale comme au chargement de la page
+  config.scale = Math.min(
+    availableWidth / config.baseWidth,
+    availableHeight / config.baseHeight
+  );
+  // Centrer le A4 dans le canvas
+  config.pageX = (canvas.width - config.baseWidth * config.scale) / 2;
+  config.pageY = (canvas.height - config.baseHeight * config.scale) / 2;
+  draw();
+}
+
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
@@ -547,12 +564,14 @@ elements.closeControls.addEventListener("click", () => {
   console.log("close");
   elements.controls.classList.add("hidden");
   elements.openControls.classList.remove("hidden");
+  elements.resetButton.classList.remove("hidden");
 });
 
 elements.openControls.addEventListener("click", () => {
   console.log("open");
   elements.controls.classList.remove("hidden");
   elements.openControls.classList.add("hidden");
+  elements.resetButton.classList.add("hidden");
 });
 
 /* ----- Export PNG ----- */
@@ -569,6 +588,9 @@ elements.exportButton.addEventListener("click", () => {
   link.download = seriesTitle ? `${seriesTitle}.png` : "nextflix.png";
   link.click();
 });
+
+/* ----- Bouton de recentrage et réinitialisation ----- */
+elements.resetButton.addEventListener("click", recenter);
 
 /* ----- Chargement des exemples depuis JSON ----- */
 window.addEventListener("load", () => {
