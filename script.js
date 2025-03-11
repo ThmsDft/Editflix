@@ -574,24 +574,33 @@ elements.openControls.addEventListener("click", () => {
   elements.resetButton.classList.add("hidden");
 });
 
-/* ----- Export PNG ----- */
-elements.exportButton.addEventListener("click", () => {
-  window.open(
-    "https://www.effectiveratecpm.com/bcpnxwhi6?key=1cd182f697062c679465139b07c58431",
-    "_blank"
-  );
+/* ----- Export PNG ou Redirection ----- */
+let toggleDownload = false; // Variable pour alterner les actions
 
-  const exportMultiplier = 3;
-  const tempCanvas = document.createElement("canvas");
-  tempCanvas.width = config.baseWidth * exportMultiplier;
-  tempCanvas.height = config.baseHeight * exportMultiplier;
-  const tempCtx = tempCanvas.getContext("2d");
-  tempCtx.scale(exportMultiplier, exportMultiplier);
-  drawContent(tempCtx, 0, 0, 1);
-  const link = document.createElement("a");
-  link.href = tempCanvas.toDataURL("image/png");
-  link.download = seriesTitle ? `Editflix-${seriesTitle}.png` : "Editflix.png";
-  link.click();
+elements.exportButton.addEventListener("click", () => {
+  if (toggleDownload) {
+    // Téléchargement de l'image
+    const exportMultiplier = 3;
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = config.baseWidth * exportMultiplier;
+    tempCanvas.height = config.baseHeight * exportMultiplier;
+    const tempCtx = tempCanvas.getContext("2d");
+    tempCtx.scale(exportMultiplier, exportMultiplier);
+    drawContent(tempCtx, 0, 0, 1);
+    const link = document.createElement("a");
+    link.href = tempCanvas.toDataURL("image/png");
+    link.download = seriesTitle ? `${seriesTitle}.png` : "nextflix.png";
+    link.click();
+  } else {
+    // Redirection vers Google
+    window.open(
+      "https://www.effectiveratecpm.com/bcpnxwhi6?key=1cd182f697062c679465139b07c58431",
+      "_blank"
+    );
+  }
+
+  // Alterne l'état pour la prochaine action
+  toggleDownload = !toggleDownload;
 });
 
 /* ----- Bouton de recentrage et réinitialisation ----- */
