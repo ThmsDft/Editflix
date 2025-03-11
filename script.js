@@ -12,6 +12,10 @@ let photo = null;
 let isDraggingPage = false,
   dragStartX,
   dragStartY;
+let isPinching = false,
+  lastTouchDistance = 0,
+  isPanning = false,
+  lastTouchPosition = { x: 0, y: 0 };
 
 /* ----- Préchargement des images SVG ----- */
 const images = {
@@ -373,10 +377,21 @@ function resizeCanvas() {
   const container = document.getElementById("canvas-container");
   canvas.width = container.clientWidth;
   canvas.height = container.clientHeight;
-  if (config.pageX === 0 && config.pageY === 0) {
-    config.pageX = (canvas.width - config.baseWidth * config.scale) / 2;
-    config.pageY = (canvas.height - config.baseHeight * config.scale) / 2;
-  }
+
+  // Définir une marge (par exemple 20px de chaque côté)
+  const margin = 20;
+  const availableWidth = canvas.width - 2 * margin;
+  const availableHeight = canvas.height - 2 * margin;
+
+  // Calculer le scale pour que le A4 tienne dans l'espace disponible
+  const scaleWidth = availableWidth / config.baseWidth;
+  const scaleHeight = availableHeight / config.baseHeight;
+  config.scale = Math.min(scaleWidth, scaleHeight);
+
+  // Centrer le contenu dans le canvas
+  config.pageX = (canvas.width - config.baseWidth * config.scale) / 2;
+  config.pageY = (canvas.height - config.baseHeight * config.scale) / 2;
+
   draw();
 }
 
