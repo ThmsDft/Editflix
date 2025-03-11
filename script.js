@@ -593,7 +593,7 @@ elements.exportButton.addEventListener("click", () => {
     link.click();
 
     // Change le texte du bouton pour la prochaine action
-    elements.exportButton.textContent = "Me soutenir puis exporter";
+    elements.exportButton.textContent = "Me soutenir puis exporter l'image";
   } else {
     // Redirection vers Google
     window.open(
