@@ -240,10 +240,10 @@ input[type="number"]::-webkit-outer-spin-button {
 
 #ad-banner {
   position: fixed;
+  display: flex;
+  flex-direction: column;
   top: 0;
   right: 0;
-  width: 160px;
-  height: 100vh;
   z-index: 900;
   background-color: #141414;
 }
