@@ -27,14 +27,14 @@ button#open {
   transition: background-color 0.3s ease;
   padding: 0px;
   display: flex;
-  padding: 15px 15px;
-  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.253);
+  padding: 13px 13px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
   border-radius: 40px;
 }
 
 button#open img {
-  width: 25px;
-  height: 25px;
+  width: 20px;
+  height: 20px;
 }
 
 /* Zone du canvas */
