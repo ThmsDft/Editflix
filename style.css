@@ -248,7 +248,7 @@ input[type="number"]::-webkit-outer-spin-button {
   background-color: #141414;
 }
 
-@media screen and (max-width: 500px) {
+@media screen and (max-width: 490px) {
   #ad-banner {
     display: none;
   }
