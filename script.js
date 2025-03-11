@@ -24,7 +24,7 @@ const images = {
   rectangle: new Image(),
   top10: new Image(),
 };
-images.netflix.src = "./svg/Netflix.svg";
+images.netflix.src = "./svg/Serie.svg";
 images.hd.src = "./svg/HD.svg";
 images.rectangle.src = "./svg/Rectangle.svg";
 images.top10.src = "./svg/Top10.svg";
