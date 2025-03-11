@@ -591,12 +591,18 @@ elements.exportButton.addEventListener("click", () => {
     link.href = tempCanvas.toDataURL("image/png");
     link.download = seriesTitle ? `${seriesTitle}.png` : "nextflix.png";
     link.click();
+
+    // Change le texte du bouton pour la prochaine action
+    elements.exportButton.textContent = "Me soutenir puis exporter";
   } else {
     // Redirection vers Google
     window.open(
       "https://www.effectiveratecpm.com/bcpnxwhi6?key=1cd182f697062c679465139b07c58431",
       "_blank"
     );
+
+    // Change le texte du bouton pour la prochaine action
+    elements.exportButton.textContent = "Exporter l'image";
   }
 
   // Alterne l'état pour la prochaine action
