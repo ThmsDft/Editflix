@@ -589,7 +589,7 @@ elements.exportButton.addEventListener("click", () => {
     drawContent(tempCtx, 0, 0, 1);
     const link = document.createElement("a");
     link.href = tempCanvas.toDataURL("image/png");
-    link.download = seriesTitle ? `${seriesTitle}.png` : "nextflix.png";
+    link.download = seriesTitle ? `Editflix-${seriesTitle}.png` : "Editflix.png";
     link.click();
 
     // Change le texte du bouton pour la prochaine action
