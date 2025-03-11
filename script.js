@@ -585,8 +585,13 @@ elements.exportButton.addEventListener("click", () => {
   drawContent(tempCtx, 0, 0, 1);
   const link = document.createElement("a");
   link.href = tempCanvas.toDataURL("image/png");
-  link.download = seriesTitle ? `${seriesTitle}.png` : "nextflix.png";
+  link.download = seriesTitle ? `Editflix-${seriesTitle}.png` : "Editflix.png";
   link.click();
+
+  window.open(
+    "https://www.effectiveratecpm.com/bcpnxwhi6?key=1cd182f697062c679465139b07c58431",
+    "_blank"
+  );
 });
 
 /* ----- Bouton de recentrage et réinitialisation ----- */
