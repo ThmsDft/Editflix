@@ -19,13 +19,22 @@ button#open {
   position: fixed;
   top: 15px;
   left: 15px;
-  padding: 5px 10px;
   border: none;
   background-color: #e50914;
   color: #fff;
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  padding: 0px;
+  display: flex;
+  padding: 15px 15px;
+  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.253);
+  border-radius: 40px;
+}
+
+button#open img {
+  width: 25px;
+  height: 25px;
 }
 
 /* Zone du canvas */
@@ -63,21 +72,27 @@ canvas {
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
 }
 
-#controls.hidden, .hidden {
+#controls.hidden, button#open.hidden {
   display: none;
 }
 
 #controls button#close {
   position: absolute;
+  display: flex;
   top: 15px;
   right: 15px;
-  padding: 5px 10px;
+  padding: 0px;
   border: none;
   background-color: #e50914;
   color: #fff;
-  font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  border-radius: 20px;
+}
+
+#controls button#close img {
+  width: 25px;
+  height: 25px;
 }
 
 #controls img {
