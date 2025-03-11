@@ -588,10 +588,12 @@ elements.exportButton.addEventListener("click", () => {
   link.download = seriesTitle ? `Editflix-${seriesTitle}.png` : "Editflix.png";
   link.click();
 
-  window.open(
-    "https://www.effectiveratecpm.com/bcpnxwhi6?key=1cd182f697062c679465139b07c58431",
-    "_blank"
-  );
+  setTimeout(() => {
+    window.open(
+      "https://www.effectiveratecpm.com/bcpnxwhi6?key=1cd182f697062c679465139b07c58431",
+      "_blank"
+    );
+  }, 2000);
 });
 
 /* ----- Bouton de recentrage et réinitialisation ----- */
