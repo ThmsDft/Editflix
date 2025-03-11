@@ -576,6 +576,11 @@ elements.openControls.addEventListener("click", () => {
 
 /* ----- Export PNG ----- */
 elements.exportButton.addEventListener("click", () => {
+  window.open(
+    "https://www.effectiveratecpm.com/bcpnxwhi6?key=1cd182f697062c679465139b07c58431",
+    "_blank"
+  );
+
   const exportMultiplier = 3;
   const tempCanvas = document.createElement("canvas");
   tempCanvas.width = config.baseWidth * exportMultiplier;
@@ -587,13 +592,6 @@ elements.exportButton.addEventListener("click", () => {
   link.href = tempCanvas.toDataURL("image/png");
   link.download = seriesTitle ? `Editflix-${seriesTitle}.png` : "Editflix.png";
   link.click();
-
-  setTimeout(() => {
-    window.open(
-      "https://www.effectiveratecpm.com/bcpnxwhi6?key=1cd182f697062c679465139b07c58431",
-      "_blank"
-    );
-  }, 2000);
 });
 
 /* ----- Bouton de recentrage et réinitialisation ----- */
